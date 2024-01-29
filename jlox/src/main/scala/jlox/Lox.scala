@@ -3,9 +3,8 @@ package jlox
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.charset.Charset
-import java.io.InputStreamReader
-import java.io.BufferedReader
 import scala.annotation.tailrec
+import scala.io.StdIn
 
 var hadError = false
 
@@ -27,12 +26,9 @@ def runFile(path: String): Unit =
   if (hadError) then System.exit(65)
 
 def runPrompt(): Unit =
-  val input = new InputStreamReader(System.in)
-  val reader = new BufferedReader(input)
-
   while true do
     print("> ")
-    val line = reader.readLine()
+    val line = StdIn.readLine()
     if line == null then return
     else
       run(line)

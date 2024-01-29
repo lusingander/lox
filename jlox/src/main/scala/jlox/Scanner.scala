@@ -15,7 +15,7 @@ class Scanner(
     while !isAtEnd() do
       start = current
       scanToken()
-    tokens.addOne(Token(TokenType.Eof, "", null, line))
+    tokens.addOne(Token(TokenType.Eof, "", None, line))
     tokens.toSeq
 
   private def scanToken(): Unit =
@@ -57,10 +57,7 @@ class Scanner(
         else if isAlpha(c) then identifier()
         else error(line, s"Unexpected character `$c`")
 
-  private def addToken(tp: TokenType): Unit =
-    addToken(tp, null)
-
-  private def addToken(tp: TokenType, literal: Any): Unit =
+  private def addToken(tp: TokenType, literal: Option[Any] = None): Unit =
     val text = source.substring(start, current)
     tokens.addOne(Token(tp, text, literal, line))
 
@@ -96,7 +93,7 @@ class Scanner(
     else
       advance() // '"'
       val value = source.substring(start + 1, current - 1)
-      addToken(TokenType.String, value)
+      addToken(TokenType.String, Some(value))
 
   private def number(): Unit =
     while isDigit(peek()) do advance()
@@ -104,7 +101,7 @@ class Scanner(
       advance() // '.'
       while isDigit(peek()) do advance()
     val value = source.subSequence(start, current).toString().toDouble
-    addToken(TokenType.Number, value)
+    addToken(TokenType.Number, Some(value))
 
   private def identifier(): Unit =
     while isAlphaNumeric(peek()) do advance()
