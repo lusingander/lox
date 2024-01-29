@@ -55,7 +55,7 @@ class Scanner(
       case _ =>
         if isDigit(c) then number()
         else if isAlpha(c) then identifier()
-        else error(line, s"Unexpected character `$c`")
+        else Lox.error(line, s"Unexpected character `$c`")
 
   private def addToken(tp: TokenType, literal: Option[Any] = None): Unit =
     val text = source.substring(start, current)
@@ -89,7 +89,7 @@ class Scanner(
       if peek() == '\n' then line += 1
       advance()
 
-    if isAtEnd() then error(line, s"Unterminated string")
+    if isAtEnd() then Lox.error(line, s"Unterminated string")
     else
       advance() // '"'
       val value = source.substring(start + 1, current - 1)

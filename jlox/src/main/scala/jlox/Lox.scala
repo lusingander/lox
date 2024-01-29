@@ -6,45 +6,46 @@ import java.nio.charset.Charset
 import scala.annotation.tailrec
 import scala.io.StdIn
 
-var hadError = false
-
 def main(args: Array[String]): Unit =
   if args.length > 1 then
     println("Usage: jlox [script]")
     System.exit(64)
   else if args.length == 1 then
     println("runFile:")
-    runFile(args(0))
+    Lox.runFile(args(0))
   else
     println("runPromt:")
-    runPrompt()
+    Lox.runPrompt()
 
-def runFile(path: String): Unit =
-  val bytes = Files.readAllBytes(Paths.get(path))
-  run(new String(bytes, Charset.defaultCharset()))
+object Lox:
+  var hadError = false
 
-  if (hadError) then System.exit(65)
+  def runFile(path: String): Unit =
+    val bytes = Files.readAllBytes(Paths.get(path))
+    run(new String(bytes, Charset.defaultCharset()))
 
-def runPrompt(): Unit =
-  while true do
-    print("> ")
-    val line = StdIn.readLine()
-    if line == null then return
-    else
-      run(line)
-      hadError = false
+    if (hadError) then System.exit(65)
 
-def run(source: String): Unit =
-  val scanner = new Scanner(source)
-  val tokens = scanner.scanTokens()
+  def runPrompt(): Unit =
+    while true do
+      print("> ")
+      val line = StdIn.readLine()
+      if line == null then return
+      else
+        run(line)
+        hadError = false
 
-  tokens.foreach { token =>
-    println(token)
-  }
+  private def run(source: String): Unit =
+    val scanner = new Scanner(source)
+    val tokens = scanner.scanTokens()
 
-def error(line: Int, message: String): Unit =
-  report(line, "", message)
+    tokens.foreach { token =>
+      println(token)
+    }
 
-def report(line: Int, where: String, message: String): Unit =
-  Console.err.println(s"[line $line] Error$where: $message")
-  hadError = true
+  def error(line: Int, message: String): Unit =
+    report(line, "", message)
+
+  def report(line: Int, where: String, message: String): Unit =
+    Console.err.println(s"[line $line] Error$where: $message")
+    hadError = true
