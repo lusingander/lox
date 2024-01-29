@@ -21,6 +21,25 @@ class ExprTest extends AnyFunSuite:
     val actual = sut.print(expr)
     assert(actual == expected)
 
+  test("RpnPrinter"):
+    val expr = Expr.Binary(
+      left = Expr.Binary(
+        left = Expr.Literal(1),
+        operator = Token(TokenType.Plus, "+", None, 1),
+        right = Expr.Literal(2),
+      ),
+      operator = Token(TokenType.Star, "*", None, 1),
+      right = Expr.Binary(
+        left = Expr.Literal(4),
+        operator = Token(TokenType.Minus, "-", None, 1),
+        right = Expr.Literal(3),
+      ),
+    )
+    val expected = "1 2 + 4 3 - *"
+    val sut = RpnPrinter()
+    val actual = sut.print(expr)
+    assert(actual == expected)
+
 class AstPrinter extends Expr.Visitor[String]:
 
   def print(expr: Expr): String = expr.accept(this)
@@ -46,3 +65,17 @@ class AstPrinter extends Expr.Visitor[String]:
       b.append(e.accept(this))
     b.append(")")
     b.toString
+
+class RpnPrinter extends Expr.Visitor[String]:
+
+  def print(expr: Expr): String = expr.accept(this)
+
+  override def visitBinaryExpr(expr: Expr.Binary): String =
+    s"${expr.left.accept(this)} ${expr.right.accept(this)} ${expr.operator.lexeme}"
+
+  override def visitGroupingExpr(expr: Expr.Grouping): String = ???
+
+  override def visitLiteralExpr(expr: Expr.Literal): String =
+    expr.value.toString()
+
+  override def visitUnaryExpr(expr: Expr.Unary): String = ???
