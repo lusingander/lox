@@ -12,7 +12,7 @@ object Expr:
     override def accept[R](visitor: Visitor[R]): R =
       visitor.visitGroupingExpr(this)
 
-  case class Literal(value: Any) extends Expr:
+  case class Literal(value: Option[Any]) extends Expr:
     override def accept[R](visitor: Visitor[R]): R =
       visitor.visitLiteralExpr(this)
 

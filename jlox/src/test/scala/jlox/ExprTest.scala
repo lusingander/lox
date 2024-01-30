@@ -9,11 +9,11 @@ class ExprTest extends AnyFunSuite:
     val expr = Expr.Binary(
       left = Expr.Unary(
         operator = Token(TokenType.Minus, "-", None, 1),
-        right = Expr.Literal(123),
+        right = Expr.Literal(Some(123)),
       ),
       operator = Token(TokenType.Star, "*", None, 1),
       right = Expr.Grouping(
-        expression = Expr.Literal(45.67),
+        expression = Expr.Literal(Some(45.67)),
       ),
     )
     val expected = "(* (- 123) (group 45.67))"
@@ -24,15 +24,15 @@ class ExprTest extends AnyFunSuite:
   test("RpnPrinter"):
     val expr = Expr.Binary(
       left = Expr.Binary(
-        left = Expr.Literal(1),
+        left = Expr.Literal(Some(1)),
         operator = Token(TokenType.Plus, "+", None, 1),
-        right = Expr.Literal(2),
+        right = Expr.Literal(Some(2)),
       ),
       operator = Token(TokenType.Star, "*", None, 1),
       right = Expr.Binary(
-        left = Expr.Literal(4),
+        left = Expr.Literal(Some(4)),
         operator = Token(TokenType.Minus, "-", None, 1),
-        right = Expr.Literal(3),
+        right = Expr.Literal(Some(3)),
       ),
     )
     val expected = "1 2 + 4 3 - *"
@@ -51,7 +51,9 @@ class AstPrinter extends Expr.Visitor[String]:
     parenthesize("group", expr.expression)
 
   override def visitLiteralExpr(expr: Expr.Literal): String =
-    if expr.value == null then "nil" else expr.value.toString()
+    expr.value match
+      case Some(v) => v.toString()
+      case None    => "nil"
 
   override def visitUnaryExpr(expr: Expr.Unary): String =
     parenthesize(expr.operator.lexeme, expr.right)
@@ -76,6 +78,8 @@ class RpnPrinter extends Expr.Visitor[String]:
   override def visitGroupingExpr(expr: Expr.Grouping): String = ???
 
   override def visitLiteralExpr(expr: Expr.Literal): String =
-    expr.value.toString()
+    expr.value match
+      case Some(v) => v.toString()
+      case None    => "nil"
 
   override def visitUnaryExpr(expr: Expr.Unary): String = ???
