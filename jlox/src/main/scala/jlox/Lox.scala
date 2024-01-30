@@ -39,12 +39,19 @@ object Lox:
     val scanner = new Scanner(source)
     val tokens = scanner.scanTokens()
 
-    tokens.foreach { token =>
-      println(token)
-    }
+    val parser = Parser(tokens)
+    val expr = parser.parse()
+
+    if hadError then return
+
+    println(expr)
 
   def error(line: Int, message: String): Unit =
     report(line, "", message)
+
+  def error(token: Token, message: String): Unit =
+    if token.tp == TokenType.Eof then report(token.line, " at end", message)
+    else report(token.line, s" at '${token.lexeme}'", message)
 
   def report(line: Int, where: String, message: String): Unit =
     Console.err.println(s"[line $line] Error$where: $message")
