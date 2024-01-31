@@ -57,7 +57,10 @@ class Scanner(
         else if isAlpha(c) then identifier()
         else Lox.error(line, s"Unexpected character `$c`")
 
-  private def addToken(tp: TokenType, literal: Option[Any] = None): Unit =
+  private def addToken(
+      tp: TokenType,
+      literal: Option[LiteralType] = None,
+  ): Unit =
     val text = source.substring(start, current)
     tokens.addOne(Token(tp, text, literal, line))
 
