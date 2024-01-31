@@ -22,7 +22,7 @@ object Lox:
 
   def runFile(path: String): Unit =
     val bytes = Files.readAllBytes(Paths.get(path))
-    run(new String(bytes, Charset.defaultCharset()))
+    run(String(bytes, Charset.defaultCharset()))
 
     if (hadError) then System.exit(65)
 
@@ -36,7 +36,7 @@ object Lox:
         hadError = false
 
   private def run(source: String): Unit =
-    val scanner = new Scanner(source)
+    val scanner = Scanner(source)
     val tokens = scanner.scanTokens()
 
     val parser = Parser(tokens)

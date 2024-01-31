@@ -29,7 +29,7 @@ class GenerateAst:
       types: Seq[(String, String)],
   ): Unit =
     val path = s"$outputDir/$baseName.scala"
-    val writer = new PrintWriter(path, StandardCharsets.UTF_8)
+    val writer = PrintWriter(path, StandardCharsets.UTF_8)
 
     writer.println("package jlox")
     writer.println()

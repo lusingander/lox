@@ -6,7 +6,7 @@ class ScannerTest extends AnyFunSuite:
 
   test("empty"):
     val source = ""
-    val sut = new Scanner(source)
+    val sut = Scanner(source)
     val expected = Seq(
       Token(TokenType.Eof, "", None, 1),
     )
@@ -15,7 +15,7 @@ class ScannerTest extends AnyFunSuite:
 
   test("single line"):
     val source = """var xyz = "123"; var _x = 456.789;"""
-    val sut = new Scanner(source)
+    val sut = Scanner(source)
     val expected = Seq(
       Token(TokenType.Var, "var", None, 1),
       Token(TokenType.Identifier, "xyz", None, 1),
@@ -38,7 +38,7 @@ class ScannerTest extends AnyFunSuite:
     |  return false;
     |}
     """.stripMargin
-    val sut = new Scanner(source)
+    val sut = Scanner(source)
     val expected = Seq(
       Token(TokenType.If, "if", None, 2),
       Token(TokenType.LeftParen, "(", None, 2),
