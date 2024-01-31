@@ -2,8 +2,9 @@ package jlox
 
 class Parser(
     val tokens: Seq[Token],
-    var current: Int = 0,
 ):
+  var current: Int = 0
+
   import Parser.*
 
   def parse(): Expr =

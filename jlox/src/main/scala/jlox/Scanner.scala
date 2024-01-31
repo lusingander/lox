@@ -4,11 +4,12 @@ import scala.collection.mutable
 
 class Scanner(
     val source: String,
-    val tokens: mutable.ListBuffer[Token] = mutable.ListBuffer.empty,
-    var start: Int = 0,
-    var current: Int = 0,
-    var line: Int = 1,
 ):
+  val tokens: mutable.ListBuffer[Token] = mutable.ListBuffer.empty
+  var start: Int = 0
+  var current: Int = 0
+  var line: Int = 1
+
   import Scanner.*
 
   def scanTokens(): Seq[Token] =
