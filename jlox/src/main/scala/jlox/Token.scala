@@ -3,7 +3,7 @@ package jlox
 case class Token(
     tp: TokenType,
     lexeme: String,
-    literal: Option[LiteralType],
+    literal: LoxDataType,
     line: Int,
 ):
   override def toString(): String = s"$tp $lexeme $literal"
@@ -57,5 +57,3 @@ enum TokenType:
 
   // EOF
   case Eof
-
-type LiteralType = Int | Double | String | Boolean

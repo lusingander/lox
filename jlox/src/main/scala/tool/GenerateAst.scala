@@ -17,7 +17,7 @@ class GenerateAst:
     val types = Seq(
       ("Binary", "left: Expr, operator: Token, right: Expr"),
       ("Grouping", "expression: Expr"),
-      ("Literal", "value: Option[Any]"),
+      ("Literal", "value: LoxDataType"),
       ("Unary", "operator: Token, right: Expr"),
     )
     defineAst(outputDir, "Expr", types)
