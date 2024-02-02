@@ -19,12 +19,16 @@ def main(args: Array[String]): Unit =
 
 object Lox:
   var hadError = false
+  var hadRuntimeError = false
+
+  val interpreter = Interpreter()
 
   def runFile(path: String): Unit =
     val bytes = Files.readAllBytes(Paths.get(path))
     run(String(bytes, Charset.defaultCharset()))
 
     if (hadError) then System.exit(65)
+    if (hadRuntimeError) then System.exit(70)
 
   def runPrompt(): Unit =
     while true do
@@ -44,7 +48,7 @@ object Lox:
 
     if hadError then return
 
-    println(expr)
+    interpreter.interpret(expr)
 
   def error(line: Int, message: String): Unit =
     report(line, "", message)
@@ -52,6 +56,10 @@ object Lox:
   def error(token: Token, message: String): Unit =
     if token.tp == TokenType.Eof then report(token.line, " at end", message)
     else report(token.line, s" at '${token.lexeme}'", message)
+
+  def runtimeError(e: RuntimeError): Unit =
+    Console.err.println(s"${e.getMessage()}\n[line ${e.token.line}]")
+    hadRuntimeError = true
 
   def report(line: Int, where: String, message: String): Unit =
     Console.err.println(s"[line $line] Error$where: $message")
