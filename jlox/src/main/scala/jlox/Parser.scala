@@ -24,12 +24,7 @@ class Parser(
 
   private def comparison(): Expr =
     var expr = term()
-    while `match`(
-        TokenType.Greater,
-        TokenType.GreaterEqual,
-        TokenType.LessEqual,
-        TokenType.Less,
-      )
+    while `match`(TokenType.Greater, TokenType.GreaterEqual, TokenType.LessEqual, TokenType.Less)
     do
       val operator = previous()
       val right = term()
@@ -63,8 +58,7 @@ class Parser(
     if `match`(TokenType.False) then Expr.Literal(Some(false))
     else if `match`(TokenType.True) then Expr.Literal(Some(true))
     else if `match`(TokenType.Nil) then Expr.Literal(None)
-    else if `match`(TokenType.Number, TokenType.String) then
-      Expr.Literal(previous().literal)
+    else if `match`(TokenType.Number, TokenType.String) then Expr.Literal(previous().literal)
     else if `match`(TokenType.LeftParen) then
       val expr = expression()
       consume(TokenType.RightParen, "Expect ')' after expression.")
@@ -108,9 +102,8 @@ class Parser(
     while !isAtEnd() do
       if previous().tp == TokenType.Semicolon then return
       peek().tp match
-        case TokenType.Class | TokenType.For | TokenType.Fun | TokenType.If |
-            TokenType.Print | TokenType.Return | TokenType.Var |
-            TokenType.While =>
+        case TokenType.Class | TokenType.For | TokenType.Fun | TokenType.If | TokenType.Print |
+            TokenType.Return | TokenType.Var | TokenType.While =>
           return
         case _ => advance()
 

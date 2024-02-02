@@ -42,8 +42,7 @@ class Scanner(
         val tp = if `match`('=') then TokenType.LessEqual else TokenType.Less
         addToken(tp)
       case '>' =>
-        val tp =
-          if `match`('=') then TokenType.GreaterEqual else TokenType.Greater
+        val tp = if `match`('=') then TokenType.GreaterEqual else TokenType.Greater
         addToken(tp)
       case '/' =>
         if `match`('/') then
