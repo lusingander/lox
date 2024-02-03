@@ -14,9 +14,9 @@ class Interpreter extends Expr.Visitor[LoxDataType]:
     val right = evaluate(expr.right)
     expr.operator.tp match
       case TokenType.EqualEqual =>
-        LoxDataType.Bool(isEqual(left, right))
+        LoxDataType.Bool(left == right)
       case TokenType.BangEqual =>
-        LoxDataType.Bool(!isEqual(left, right))
+        LoxDataType.Bool(left != right)
       case TokenType.Greater =>
         (left, right) match
           case (LoxDataType.Number(l), LoxDataType.Number(r)) => LoxDataType.Bool(l > r)
@@ -51,7 +51,7 @@ class Interpreter extends Expr.Visitor[LoxDataType]:
         (left, right) match
           case (LoxDataType.Number(l), LoxDataType.Number(r)) => LoxDataType.Number(l * r)
           case (_, _) => throw RuntimeError(expr.operator, "Operands must be numbers.")
-      case _ => ???
+      case _ => throw RuntimeError(expr.operator, s"Unexpected operator: ${expr.operator.tp}")
 
   override def visitGroupingExpr(expr: Expr.Grouping): LoxDataType =
     evaluate(expr.expression)
@@ -67,7 +67,7 @@ class Interpreter extends Expr.Visitor[LoxDataType]:
         right match
           case LoxDataType.Number(v) => LoxDataType.Number(-v)
           case _ => throw RuntimeError(expr.operator, "Operand must be a number.")
-      case _ => ???
+      case _ => throw RuntimeError(expr.operator, s"Unexpected operator: ${expr.operator.tp}")
 
   private def isTruthy(obj: LoxDataType): Boolean =
     obj match
@@ -75,6 +75,3 @@ class Interpreter extends Expr.Visitor[LoxDataType]:
       case LoxDataType.String(_) => true
       case LoxDataType.Bool(v)   => v
       case LoxDataType.Nil       => false
-
-  private def isEqual(a: LoxDataType, b: LoxDataType): Boolean =
-    a == b
