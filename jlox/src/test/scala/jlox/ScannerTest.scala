@@ -58,3 +58,20 @@ class ScannerTest extends AnyFunSuite:
     )
     val actual = sut.scanTokens()
     assert(actual == expected)
+
+  test("comment"):
+    val source = """
+    |// var x = 123;
+    |var y = 456;
+    """.stripMargin
+    val sut = Scanner(source)
+    val expected = Seq(
+      Token(TokenType.Var, "var", LoxDataType.Nil, 3),
+      Token(TokenType.Identifier, "y", LoxDataType.Nil, 3),
+      Token(TokenType.Equal, "=", LoxDataType.Nil, 3),
+      Token(TokenType.Number, "456", LoxDataType.Number(456), 3),
+      Token(TokenType.Semicolon, ";", LoxDataType.Nil, 3),
+      Token(TokenType.Eof, "", LoxDataType.Nil, 4),
+    )
+    val actual = sut.scanTokens()
+    assert(actual == expected)
