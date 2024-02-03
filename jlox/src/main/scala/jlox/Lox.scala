@@ -48,7 +48,8 @@ object Lox:
 
     if hadError then return
 
-    interpreter.interpret(expr)
+    val out = interpreter.interpret(expr)
+    println(out)
 
   def error(line: Int, message: String): Unit =
     report(line, "", message)

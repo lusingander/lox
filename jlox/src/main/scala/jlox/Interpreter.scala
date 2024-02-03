@@ -2,10 +2,8 @@ package jlox
 
 class Interpreter extends Expr.Visitor[LoxDataType]:
 
-  def interpret(expression: Expr): Unit =
-    try
-      val value = evaluate(expression)
-      println(stringify(value))
+  def interpret(expression: Expr): LoxDataType | Unit =
+    try evaluate(expression)
     catch case e: RuntimeError => Lox.runtimeError(e)
 
   private def evaluate(expr: Expr): LoxDataType =
@@ -80,6 +78,3 @@ class Interpreter extends Expr.Visitor[LoxDataType]:
 
   private def isEqual(a: LoxDataType, b: LoxDataType): Boolean =
     a == b
-
-  private def stringify(value: LoxDataType): String =
-    value.toString()
