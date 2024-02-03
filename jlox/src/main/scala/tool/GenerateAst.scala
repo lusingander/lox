@@ -14,13 +14,18 @@ class GenerateAst:
       System.exit(64)
 
     val outputDir = args(0)
-    val types = Seq(
+    val exprTypes = Seq(
       ("Binary", "left: Expr, operator: Token, right: Expr"),
       ("Grouping", "expression: Expr"),
       ("Literal", "value: LoxDataType"),
       ("Unary", "operator: Token, right: Expr"),
     )
-    defineAst(outputDir, "Expr", types)
+    val stmtTypes = Seq(
+      ("Expression", "expression: Expr"),
+      ("Print", "expression: Expr"),
+    )
+    defineAst(outputDir, "Expr", exprTypes)
+    defineAst(outputDir, "Stmt", stmtTypes)
 
   // enum に個別のメソッド定義できない & ひとまず実装をサンプルに寄せるために sealed trait で定義
   private def defineAst(

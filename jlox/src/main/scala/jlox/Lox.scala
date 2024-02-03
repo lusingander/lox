@@ -44,12 +44,11 @@ object Lox:
     val tokens = scanner.scanTokens()
 
     val parser = Parser(tokens)
-    val expr = parser.parse()
+    val statements = parser.parse()
 
     if hadError then return
 
-    val out = interpreter.interpret(expr)
-    println(out)
+    interpreter.interpret(statements)
 
   def error(line: Int, message: String): Unit =
     report(line, "", message)

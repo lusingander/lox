@@ -1,5 +1,7 @@
 package jlox
 
+import scala.collection.mutable
+
 class Parser(
     val tokens: Seq[Token],
 ):
@@ -7,12 +9,27 @@ class Parser(
 
   import Parser.*
 
-  def parse(): Expr =
-    try expression()
-    catch case e: ParseError => null
+  def parse(): Seq[Stmt] =
+    val statements = mutable.ListBuffer.empty[Stmt]
+    while !isAtEnd() do statements.addOne(statement())
+    statements.toSeq
 
   private def expression(): Expr =
     equality()
+
+  private def statement(): Stmt =
+    if `match`(TokenType.Print) then printStatement()
+    else expressionStatement()
+
+  private def printStatement(): Stmt =
+    val value = expression()
+    consume(TokenType.Semicolon, "Expect ';' after value.")
+    Stmt.Print(value)
+
+  private def expressionStatement(): Stmt =
+    val expr = expression()
+    consume(TokenType.Semicolon, "Expect ';' after expression.")
+    Stmt.Expression(expr)
 
   private def equality(): Expr =
     var expr = comparison()

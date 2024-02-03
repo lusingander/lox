@@ -1,13 +1,26 @@
 package jlox
 
-class Interpreter extends Expr.Visitor[LoxDataType]:
+import jlox.Stmt.Expression
+import jlox.Stmt.Print
 
-  def interpret(expression: Expr): LoxDataType | Unit =
-    try evaluate(expression)
+class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
+
+  def interpret(statements: Seq[Stmt]): Unit =
+    try statements.foreach(execute)
     catch case e: RuntimeError => Lox.runtimeError(e)
 
   private def evaluate(expr: Expr): LoxDataType =
     expr.accept(this)
+
+  private def execute(stmt: Stmt): Unit =
+    stmt.accept(this)
+
+  override def visitExpressionStmt(stmt: Expression): Unit =
+    evaluate(stmt.expression)
+
+  override def visitPrintStmt(stmt: Print): Unit =
+    val value = evaluate(stmt.expression)
+    println(value)
 
   override def visitBinaryExpr(expr: Expr.Binary): LoxDataType =
     val left = evaluate(expr.left)

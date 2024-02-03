@@ -2,6 +2,8 @@ package jlox
 
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.prop.TableDrivenPropertyChecks
+import java.io.BufferedOutputStream
+import java.io.ByteArrayOutputStream
 
 class InterpreterTest extends AnyFunSuite with TableDrivenPropertyChecks:
 
@@ -18,9 +20,9 @@ class InterpreterTest extends AnyFunSuite with TableDrivenPropertyChecks:
       operator = Token(TokenType.Star, "*", LoxDataType.Nil, 1),
       right = Expr.Literal(LoxDataType.Number(3)),
     )
-    val exptected = LoxDataType.Number(9)
-    val actual = sut.interpret(expr)
-    assert(actual == exptected)
+    val stmts = Seq(Stmt.Print(expr))
+    val expected = LoxDataType.Number(9)
+    assertStdout(sut.interpret(stmts))(expected.toString() + "\n")
 
   test("Number +, -, *, /"):
     val table = Table(
@@ -123,7 +125,7 @@ class InterpreterTest extends AnyFunSuite with TableDrivenPropertyChecks:
       ("right", "operator", "expected"),
       (1.23, (TokenType.Minus, "-"), -1.23),
       (-10.0, (TokenType.Minus, "-"), 10.0),
-      (0.0, (TokenType.Minus, "-"), 0.0),
+      (0.0, (TokenType.Minus, "-"), -0.0),
     )
     forAll(table): (right, operator, expected) =>
       testSimpleUnaryExpr(
@@ -131,6 +133,22 @@ class InterpreterTest extends AnyFunSuite with TableDrivenPropertyChecks:
         operator = operator,
         expected = LoxDataType.Number(expected),
       )
+
+  test("複数の文"):
+    val sut = Interpreter()
+    val stmts = Seq(
+      Stmt.Print(
+        expression = Expr.Literal(LoxDataType.Bool(true)),
+      ),
+      Stmt.Print(
+        expression = Expr.Literal(LoxDataType.Nil),
+      ),
+      Stmt.Print(
+        expression = Expr.Literal(LoxDataType.String("foo")),
+      ),
+    )
+    val expected = "true\nnil\nfoo\n"
+    assertStdout(sut.interpret(stmts))(expected)
 
   private def testSimpleBinaryExpr(
       left: LoxDataType,
@@ -144,8 +162,8 @@ class InterpreterTest extends AnyFunSuite with TableDrivenPropertyChecks:
       operator = Token(operator._1, operator._2, LoxDataType.Nil, 1),
       right = Expr.Literal(right),
     )
-    val actual = sut.interpret(expr)
-    assert(actual == expected)
+    val stmts = Seq(Stmt.Print(expr))
+    assertStdout(sut.interpret(stmts))(expected.toString() + "\n")
 
   private def testSimpleUnaryExpr(
       right: LoxDataType,
@@ -157,5 +175,13 @@ class InterpreterTest extends AnyFunSuite with TableDrivenPropertyChecks:
       operator = Token(operator._1, operator._2, LoxDataType.Nil, 1),
       right = Expr.Literal(right),
     )
-    val actual = sut.interpret(expr)
-    assert(actual == expected)
+    val stmts = Seq(Stmt.Print(expr))
+    assertStdout(sut.interpret(stmts))(expected.toString() + "\n")
+
+  private def assertStdout(execute: => Unit)(expected: String): Unit =
+    val os = ByteArrayOutputStream()
+    val out = BufferedOutputStream(os)
+    Console.withOut(out):
+      execute
+    out.flush()
+    assert(os.toString() == expected)
