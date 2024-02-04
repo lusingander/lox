@@ -11,11 +11,20 @@ class Parser(
 
   def parse(): Seq[Stmt] =
     val statements = mutable.ListBuffer.empty[Stmt]
-    while !isAtEnd() do statements.addOne(statement())
+    while !isAtEnd() do statements.addOne(declaration())
     statements.toSeq
 
   private def expression(): Expr =
     equality()
+
+  private def declaration(): Stmt =
+    try
+      if `match`(TokenType.Var) then varDeclaration()
+      else statement()
+    catch
+      case e: ParseError =>
+        synchronize()
+        null
 
   private def statement(): Stmt =
     if `match`(TokenType.Print) then printStatement()
@@ -25,6 +34,12 @@ class Parser(
     val value = expression()
     consume(TokenType.Semicolon, "Expect ';' after value.")
     Stmt.Print(value)
+
+  private def varDeclaration(): Stmt =
+    val name = consume(TokenType.Identifier, "Expect variable name.")
+    val initializer = if `match`(TokenType.Equal) then Some(expression()) else None
+    consume(TokenType.Semicolon, "Expect ';' after variable declaration.")
+    Stmt.Var(name, initializer)
 
   private def expressionStatement(): Stmt =
     val expr = expression()
@@ -76,6 +91,7 @@ class Parser(
     else if `match`(TokenType.True) then Expr.Literal(LoxDataType.Bool(true))
     else if `match`(TokenType.Nil) then Expr.Literal(LoxDataType.Nil)
     else if `match`(TokenType.Number, TokenType.String) then Expr.Literal(previous().literal)
+    else if `match`(TokenType.Identifier) then Expr.Variable(previous())
     else if `match`(TokenType.LeftParen) then
       val expr = expression()
       consume(TokenType.RightParen, "Expect ')' after expression.")

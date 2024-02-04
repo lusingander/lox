@@ -2,6 +2,7 @@ package jlox
 
 import org.scalatest.funsuite.AnyFunSuite
 import scala.collection.mutable
+import jlox.Expr.Variable
 
 class ExprTest extends AnyFunSuite:
 
@@ -56,6 +57,8 @@ class AstPrinter extends Expr.Visitor[String]:
   override def visitUnaryExpr(expr: Expr.Unary): String =
     parenthesize(expr.operator.lexeme, expr.right)
 
+  override def visitVariableExpr(expr: Variable): String = ???
+
   private def parenthesize(name: String, exprs: Expr*): String =
     val b = mutable.StringBuilder()
     b.append("(")
@@ -79,3 +82,5 @@ class RpnPrinter extends Expr.Visitor[String]:
     expr.value.toString()
 
   override def visitUnaryExpr(expr: Expr.Unary): String = ???
+
+  override def visitVariableExpr(expr: Variable): String = ???

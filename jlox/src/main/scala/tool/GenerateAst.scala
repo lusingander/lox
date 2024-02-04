@@ -19,10 +19,12 @@ class GenerateAst:
       ("Grouping", "expression: Expr"),
       ("Literal", "value: LoxDataType"),
       ("Unary", "operator: Token, right: Expr"),
+      ("Variable", "name: Token"),
     )
     val stmtTypes = Seq(
       ("Expression", "expression: Expr"),
       ("Print", "expression: Expr"),
+      ("Var", "name: Token, initializer: Option[Expr]"),
     )
     defineAst(outputDir, "Expr", exprTypes)
     defineAst(outputDir, "Stmt", stmtTypes)

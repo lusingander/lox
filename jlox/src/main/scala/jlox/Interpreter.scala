@@ -1,9 +1,8 @@
 package jlox
 
-import jlox.Stmt.Expression
-import jlox.Stmt.Print
-
 class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
+
+  private val environment = Environment()
 
   def interpret(statements: Seq[Stmt]): Unit =
     try statements.foreach(execute)
@@ -15,12 +14,18 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
   private def execute(stmt: Stmt): Unit =
     stmt.accept(this)
 
-  override def visitExpressionStmt(stmt: Expression): Unit =
+  override def visitExpressionStmt(stmt: Stmt.Expression): Unit =
     evaluate(stmt.expression)
 
-  override def visitPrintStmt(stmt: Print): Unit =
+  override def visitPrintStmt(stmt: Stmt.Print): Unit =
     val value = evaluate(stmt.expression)
     println(value)
+
+  override def visitVarStmt(stmt: Stmt.Var): Unit =
+    val value = stmt.initializer match
+      case Some(initializer) => evaluate(initializer)
+      case None              => LoxDataType.Nil
+    environment.define(stmt.name.lexeme, value)
 
   override def visitBinaryExpr(expr: Expr.Binary): LoxDataType =
     val left = evaluate(expr.left)
@@ -81,6 +86,9 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
           case LoxDataType.Number(v) => LoxDataType.Number(-v)
           case _ => throw RuntimeError(expr.operator, "Operand must be a number.")
       case _ => throw RuntimeError(expr.operator, s"Unexpected operator: ${expr.operator.tp}")
+
+  override def visitVariableExpr(expr: Expr.Variable): LoxDataType =
+    environment.get(expr.name)
 
   private def isTruthy(obj: LoxDataType): Boolean =
     obj match
