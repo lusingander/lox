@@ -1,11 +1,6 @@
 package jlox
 
-import org.scalatest.funsuite.AnyFunSuite
-import org.scalatest.prop.TableDrivenPropertyChecks
-import java.io.BufferedOutputStream
-import java.io.ByteArrayOutputStream
-
-class InterpreterTest extends AnyFunSuite with TableDrivenPropertyChecks:
+class InterpreterTest extends LoxTestBase:
 
   test("Number grouping +, *"):
     val sut = Interpreter()
@@ -13,11 +8,11 @@ class InterpreterTest extends AnyFunSuite with TableDrivenPropertyChecks:
       left = Expr.Grouping(
         expression = Expr.Binary(
           left = Expr.Literal(LoxDataType.Number(1)),
-          operator = Token(TokenType.Plus, "+", LoxDataType.Nil, 1),
+          operator = token(TokenType.Plus, "+"),
           right = Expr.Literal(LoxDataType.Number(2)),
         ),
       ),
-      operator = Token(TokenType.Star, "*", LoxDataType.Nil, 1),
+      operator = token(TokenType.Star, "*"),
       right = Expr.Literal(LoxDataType.Number(3)),
     )
     val stmts = Seq(Stmt.Print(expr))
@@ -154,42 +149,42 @@ class InterpreterTest extends AnyFunSuite with TableDrivenPropertyChecks:
     val sut = Interpreter()
     val stmts = Seq(
       Stmt.Var(
-        name = Token(TokenType.Identifier, "a", LoxDataType.Nil, 1),
+        name = token(TokenType.Identifier, "a"),
         initializer = Some(Expr.Literal(LoxDataType.Number(3))),
       ),
       Stmt.Var(
-        name = Token(TokenType.Identifier, "b", LoxDataType.Nil, 1),
+        name = token(TokenType.Identifier, "b"),
         initializer = None,
       ),
       Stmt.Print(
-        expression = Expr.Variable(Token(TokenType.Identifier, "a", LoxDataType.Nil, 2)),
+        expression = Expr.Variable(token(TokenType.Identifier, "a")),
       ),
       Stmt.Print(
-        expression = Expr.Variable(Token(TokenType.Identifier, "b", LoxDataType.Nil, 2)),
+        expression = Expr.Variable(token(TokenType.Identifier, "b")),
       ),
       Stmt.Expression(
         expression = Expr.Assign(
-          name = Token(TokenType.Identifier, "a", LoxDataType.Nil, 3),
+          name = token(TokenType.Identifier, "a"),
           value = Expr.Literal(LoxDataType.Number(5)),
         ),
       ),
       Stmt.Print(
-        expression = Expr.Variable(Token(TokenType.Identifier, "a", LoxDataType.Nil, 4)),
+        expression = Expr.Variable(token(TokenType.Identifier, "a")),
       ),
       Stmt.Expression(
         expression = Expr.Assign(
-          name = Token(TokenType.Identifier, "a", LoxDataType.Nil, 5),
+          name = token(TokenType.Identifier, "a"),
           value = Expr.Assign(
-            name = Token(TokenType.Identifier, "b", LoxDataType.Nil, 5),
+            name = token(TokenType.Identifier, "b"),
             value = Expr.Literal(LoxDataType.String("foo")),
           ),
         ),
       ),
       Stmt.Print(
         expression = Expr.Binary(
-          left = Expr.Variable(Token(TokenType.Identifier, "a", LoxDataType.Nil, 6)),
-          operator = Token(TokenType.Plus, "+", LoxDataType.Nil, 6),
-          right = Expr.Variable(Token(TokenType.Identifier, "b", LoxDataType.Nil, 6)),
+          left = Expr.Variable(token(TokenType.Identifier, "a")),
+          operator = token(TokenType.Plus, "+"),
+          right = Expr.Variable(token(TokenType.Identifier, "b")),
         ),
       ),
     )
@@ -205,7 +200,7 @@ class InterpreterTest extends AnyFunSuite with TableDrivenPropertyChecks:
     val sut = Interpreter()
     val expr = Expr.Binary(
       left = Expr.Literal(left),
-      operator = Token(operator._1, operator._2, LoxDataType.Nil, 1),
+      operator = token(operator._1, operator._2),
       right = Expr.Literal(right),
     )
     val stmts = Seq(Stmt.Print(expr))
@@ -218,16 +213,8 @@ class InterpreterTest extends AnyFunSuite with TableDrivenPropertyChecks:
   ): Unit =
     val sut = Interpreter()
     val expr = Expr.Unary(
-      operator = Token(operator._1, operator._2, LoxDataType.Nil, 1),
+      operator = token(operator._1, operator._2),
       right = Expr.Literal(right),
     )
     val stmts = Seq(Stmt.Print(expr))
     assertStdout(sut.interpret(stmts))(expected.toString() + "\n")
-
-  private def assertStdout(execute: => Unit)(expected: String): Unit =
-    val os = ByteArrayOutputStream()
-    val out = BufferedOutputStream(os)
-    Console.withOut(out):
-      execute
-    out.flush()
-    assert(os.toString() == expected)

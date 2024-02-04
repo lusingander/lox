@@ -1,8 +1,6 @@
 package jlox
 
-import org.scalatest.funsuite.AnyFunSuite
-
-class ScannerTest extends AnyFunSuite:
+class ScannerTest extends LoxTestBase:
 
   test("empty"):
     val source = ""
