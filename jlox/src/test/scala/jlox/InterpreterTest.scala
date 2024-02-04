@@ -150,6 +150,52 @@ class InterpreterTest extends AnyFunSuite with TableDrivenPropertyChecks:
     val expected = "true\nnil\nfoo\n"
     assertStdout(sut.interpret(stmts))(expected)
 
+  test("var and assign"):
+    val sut = Interpreter()
+    val stmts = Seq(
+      Stmt.Var(
+        name = Token(TokenType.Identifier, "a", LoxDataType.Nil, 1),
+        initializer = Some(Expr.Literal(LoxDataType.Number(3))),
+      ),
+      Stmt.Var(
+        name = Token(TokenType.Identifier, "b", LoxDataType.Nil, 1),
+        initializer = None,
+      ),
+      Stmt.Print(
+        expression = Expr.Variable(Token(TokenType.Identifier, "a", LoxDataType.Nil, 2)),
+      ),
+      Stmt.Print(
+        expression = Expr.Variable(Token(TokenType.Identifier, "b", LoxDataType.Nil, 2)),
+      ),
+      Stmt.Expression(
+        expression = Expr.Assign(
+          name = Token(TokenType.Identifier, "a", LoxDataType.Nil, 3),
+          value = Expr.Literal(LoxDataType.Number(5)),
+        ),
+      ),
+      Stmt.Print(
+        expression = Expr.Variable(Token(TokenType.Identifier, "a", LoxDataType.Nil, 4)),
+      ),
+      Stmt.Expression(
+        expression = Expr.Assign(
+          name = Token(TokenType.Identifier, "a", LoxDataType.Nil, 5),
+          value = Expr.Assign(
+            name = Token(TokenType.Identifier, "b", LoxDataType.Nil, 5),
+            value = Expr.Literal(LoxDataType.String("foo")),
+          ),
+        ),
+      ),
+      Stmt.Print(
+        expression = Expr.Binary(
+          left = Expr.Variable(Token(TokenType.Identifier, "a", LoxDataType.Nil, 6)),
+          operator = Token(TokenType.Plus, "+", LoxDataType.Nil, 6),
+          right = Expr.Variable(Token(TokenType.Identifier, "b", LoxDataType.Nil, 6)),
+        ),
+      ),
+    )
+    val expected = "3\nnil\n5\nfoofoo\n"
+    assertStdout(sut.interpret(stmts))(expected)
+
   private def testSimpleBinaryExpr(
       left: LoxDataType,
       right: LoxDataType,
