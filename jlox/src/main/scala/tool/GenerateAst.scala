@@ -23,6 +23,7 @@ class GenerateAst:
       ("Variable", "name: Token"),
     )
     val stmtTypes = Seq(
+      ("Block", "statements: Seq[Stmt]"),
       ("Expression", "expression: Expr"),
       ("Print", "expression: Expr"),
       ("Var", "name: Token, initializer: Option[Expr]"),

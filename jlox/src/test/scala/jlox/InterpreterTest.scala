@@ -191,6 +191,42 @@ class InterpreterTest extends LoxTestBase:
     val expected = "3\nnil\n5\nfoofoo\n"
     assertStdout(sut.interpret(stmts))(expected)
 
+  test("scope"):
+    val sut = Interpreter()
+    val stmts = Seq(
+      varStmt("a", "global a"),
+      varStmt("b", "global b"),
+      varStmt("c", "global c"),
+      blockStmt(
+        varStmt("a", "outer a"),
+        varStmt("b", "outer b"),
+        blockStmt(
+          varStmt("a", "inner a"),
+          printVarStmt("a"),
+          printVarStmt("b"),
+          printVarStmt("c"),
+        ),
+        printVarStmt("a"),
+        printVarStmt("b"),
+        printVarStmt("c"),
+      ),
+      printVarStmt("a"),
+      printVarStmt("b"),
+      printVarStmt("c"),
+    )
+    val expected =
+      """inner a
+        |outer b
+        |global c
+        |outer a
+        |outer b
+        |global c
+        |global a
+        |global b
+        |global c
+        |""".stripMargin
+    assertStdout(sut.interpret(stmts))(expected)
+
   private def testSimpleBinaryExpr(
       left: LoxDataType,
       right: LoxDataType,
@@ -218,3 +254,24 @@ class InterpreterTest extends LoxTestBase:
     )
     val stmts = Seq(Stmt.Print(expr))
     assertStdout(sut.interpret(stmts))(expected.toString() + "\n")
+
+  private def varStmt(
+      name: String,
+      value: String,
+  ): Stmt.Var =
+    Stmt.Var(
+      name = token(TokenType.Identifier, name),
+      initializer = Some(Expr.Literal(LoxDataType.String(value))),
+    )
+
+  private def printVarStmt(
+      name: String,
+  ): Stmt.Print =
+    Stmt.Print(
+      expression = Expr.Variable(token(TokenType.Identifier, name)),
+    )
+
+  private def blockStmt(
+      statements: Stmt*,
+  ): Stmt.Block =
+    Stmt.Block(statements)

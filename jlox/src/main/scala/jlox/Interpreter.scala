@@ -2,7 +2,7 @@ package jlox
 
 class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
 
-  private val environment = Environment()
+  private var environment = Environment()
 
   def interpret(statements: Seq[Stmt]): Unit =
     try statements.foreach(execute)
@@ -13,6 +13,17 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
 
   private def execute(stmt: Stmt): Unit =
     stmt.accept(this)
+
+  private def executeBlock(statements: Seq[Stmt], env: Environment): Unit =
+    val previous = environment
+    try
+      environment = env
+      statements.foreach: statement =>
+        execute(statement)
+    finally environment = previous
+
+  override def visitBlockStmt(stmt: Stmt.Block): Unit =
+    executeBlock(stmt.statements, Environment(Some(environment)))
 
   override def visitExpressionStmt(stmt: Stmt.Expression): Unit =
     evaluate(stmt.expression)

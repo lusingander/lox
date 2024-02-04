@@ -46,6 +46,7 @@ class Parser(
 
   private def statement(): Stmt =
     if `match`(TokenType.Print) then printStatement()
+    else if `match`(TokenType.LeftBrace) then Stmt.Block(block())
     else expressionStatement()
 
   private def printStatement(): Stmt =
@@ -63,6 +64,12 @@ class Parser(
     val expr = expression()
     consume(TokenType.Semicolon, "Expect ';' after expression.")
     Stmt.Expression(expr)
+
+  private def block(): Seq[Stmt] =
+    val statements = mutable.ListBuffer.empty[Stmt]
+    while !check(TokenType.RightBrace) && !isAtEnd() do statements.addOne(declaration())
+    consume(TokenType.RightBrace, "Expect '}' after block.")
+    statements.toSeq
 
   private def equality(): Expr =
     var expr = comparison()
