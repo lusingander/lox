@@ -15,6 +15,7 @@ class GenerateAst:
 
     val outputDir = args(0)
     val exprTypes = Seq(
+      ("Assign", "name: Token, value: Expr"),
       ("Binary", "left: Expr, operator: Token, right: Expr"),
       ("Grouping", "expression: Expr"),
       ("Literal", "value: LoxDataType"),

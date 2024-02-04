@@ -27,6 +27,11 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
       case None              => LoxDataType.Nil
     environment.define(stmt.name.lexeme, value)
 
+  override def visitAssignExpr(expr: Expr.Assign): LoxDataType =
+    val value = evaluate(expr.value)
+    environment.assign(expr.name, value)
+    value
+
   override def visitBinaryExpr(expr: Expr.Binary): LoxDataType =
     val left = evaluate(expr.left)
     val right = evaluate(expr.right)

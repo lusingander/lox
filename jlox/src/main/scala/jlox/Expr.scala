@@ -4,6 +4,10 @@ sealed trait Expr:
   def accept[R](visitor: Expr.Visitor[R]): R
 
 object Expr:
+  case class Assign(name: Token, value: Expr) extends Expr:
+    override def accept[R](visitor: Visitor[R]): R =
+      visitor.visitAssignExpr(this)
+
   case class Binary(left: Expr, operator: Token, right: Expr) extends Expr:
     override def accept[R](visitor: Visitor[R]): R =
       visitor.visitBinaryExpr(this)
@@ -25,6 +29,7 @@ object Expr:
       visitor.visitVariableExpr(this)
 
   trait Visitor[R]:
+    def visitAssignExpr(expr: Expr.Assign): R
     def visitBinaryExpr(expr: Expr.Binary): R
     def visitGroupingExpr(expr: Expr.Grouping): R
     def visitLiteralExpr(expr: Expr.Literal): R

@@ -3,6 +3,7 @@ package jlox
 import org.scalatest.funsuite.AnyFunSuite
 import scala.collection.mutable
 import jlox.Expr.Variable
+import jlox.Expr.Assign
 
 class ExprTest extends AnyFunSuite:
 
@@ -59,6 +60,8 @@ class AstPrinter extends Expr.Visitor[String]:
 
   override def visitVariableExpr(expr: Variable): String = ???
 
+  override def visitAssignExpr(expr: Assign): String = ???
+
   private def parenthesize(name: String, exprs: Expr*): String =
     val b = mutable.StringBuilder()
     b.append("(")
@@ -84,3 +87,5 @@ class RpnPrinter extends Expr.Visitor[String]:
   override def visitUnaryExpr(expr: Expr.Unary): String = ???
 
   override def visitVariableExpr(expr: Variable): String = ???
+
+  override def visitAssignExpr(expr: Assign): String = ???
