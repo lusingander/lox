@@ -1,12 +1,6 @@
 package jlox
 
 import scala.collection.mutable
-import jlox.Expr.Assign
-import jlox.Expr.Binary
-import jlox.Expr.Grouping
-import jlox.Expr.Literal
-import jlox.Expr.Unary
-import jlox.Expr.Variable
 
 class Parser(
     val tokens: Seq[Token],
@@ -29,7 +23,7 @@ class Parser(
       val equals = previous()
       val value = assignment()
       expr match
-        case Variable(name) => Expr.Assign(name, value)
+        case Expr.Variable(name) => Expr.Assign(name, value)
         case _ =>
           error(equals, "Invalid assignment target.")
           expr

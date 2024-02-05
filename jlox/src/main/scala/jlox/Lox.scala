@@ -3,7 +3,6 @@ package jlox
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.charset.Charset
-import scala.annotation.tailrec
 import scala.io.StdIn
 
 def main(args: Array[String]): Unit =
