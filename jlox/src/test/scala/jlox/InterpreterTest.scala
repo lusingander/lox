@@ -17,7 +17,7 @@ class InterpreterTest extends LoxTestBase:
     )
     val stmts = Seq(Stmt.Print(expr))
     val expected = LoxDataType.Number(9)
-    assertStdout(sut.interpret(stmts))(expected.toString() + "\n")
+    assertOutput(sut.interpret(stmts))(expected.toString() + "\n")
 
   test("Number +, -, *, /"):
     val table = Table(
@@ -143,7 +143,7 @@ class InterpreterTest extends LoxTestBase:
       ),
     )
     val expected = "true\nnil\nfoo\n"
-    assertStdout(sut.interpret(stmts))(expected)
+    assertOutput(sut.interpret(stmts))(expected)
 
   test("var and assign"):
     val sut = Interpreter()
@@ -189,7 +189,7 @@ class InterpreterTest extends LoxTestBase:
       ),
     )
     val expected = "3\nnil\n5\nfoofoo\n"
-    assertStdout(sut.interpret(stmts))(expected)
+    assertOutput(sut.interpret(stmts))(expected)
 
   test("scope"):
     val sut = Interpreter()
@@ -225,7 +225,7 @@ class InterpreterTest extends LoxTestBase:
         |global b
         |global c
         |""".stripMargin
-    assertStdout(sut.interpret(stmts))(expected)
+    assertOutput(sut.interpret(stmts))(expected)
 
   test("if"):
     val sut = Interpreter()
@@ -256,7 +256,7 @@ class InterpreterTest extends LoxTestBase:
         |3
         |6
         |""".stripMargin
-    assertStdout(sut.interpret(stmts))(expected)
+    assertOutput(sut.interpret(stmts))(expected)
 
   test("and, or"):
     val sut = Interpreter()
@@ -296,7 +296,7 @@ class InterpreterTest extends LoxTestBase:
         |foo
         |3
         |""".stripMargin
-    assertStdout(sut.interpret(stmts))(expected)
+    assertOutput(sut.interpret(stmts))(expected)
 
   test("while"):
     val sut = Interpreter()
@@ -329,7 +329,7 @@ class InterpreterTest extends LoxTestBase:
         |3
         |4
         |""".stripMargin
-    assertStdout(sut.interpret(stmts))(expected)
+    assertOutput(sut.interpret(stmts))(expected)
 
   private def testSimpleBinaryExpr(
       left: LoxDataType,
@@ -344,7 +344,7 @@ class InterpreterTest extends LoxTestBase:
       right = Expr.Literal(right),
     )
     val stmts = Seq(Stmt.Print(expr))
-    assertStdout(sut.interpret(stmts))(expected.toString() + "\n")
+    assertOutput(sut.interpret(stmts))(expected.toString() + "\n")
 
   private def testSimpleUnaryExpr(
       right: LoxDataType,
@@ -357,7 +357,7 @@ class InterpreterTest extends LoxTestBase:
       right = Expr.Literal(right),
     )
     val stmts = Seq(Stmt.Print(expr))
-    assertStdout(sut.interpret(stmts))(expected.toString() + "\n")
+    assertOutput(sut.interpret(stmts))(expected.toString() + "\n")
 
   private def varStmt(
       name: String,

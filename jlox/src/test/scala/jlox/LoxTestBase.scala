@@ -13,8 +13,9 @@ trait LoxTestBase extends AnyFunSuite with TableDrivenPropertyChecks:
       line: Int = 1,
   ): Token = Token(tp, lexeme, literal, line)
 
-  protected def assertStdout(execute: => Unit)(expected: String): Unit =
+  protected def assertOutput(execute: => Unit)(expected: String): Unit =
     val out = ByteArrayOutputStream()
     Console.withOut(out):
-      execute
+      Console.withErr(out):
+        execute
     assert(out.toString() == expected)
