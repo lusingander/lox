@@ -43,7 +43,7 @@ class GenerateAst:
     writer.println("package jlox")
     writer.println()
     writer.println(s"sealed trait $baseName:")
-    writer.println(s"  def accept[R](visitor: $baseName.Visitor[R]): R")
+    writer.println(s"  def accept[R](visitor: $baseName.Visitor[R]): Environment ?=> R")
     writer.println()
     writer.println(s"object $baseName:")
 
@@ -51,7 +51,7 @@ class GenerateAst:
       val caseName = t._1
       val fields = t._2
       writer.println(s"  case class $caseName($fields) extends $baseName:")
-      writer.println(s"    override def accept[R](visitor: Visitor[R]): R =")
+      writer.println(s"    override def accept[R](visitor: Visitor[R]): Environment ?=> R =")
       writer.println(s"      visitor.visit$caseName$baseName(this)")
       writer.println()
 
@@ -59,7 +59,7 @@ class GenerateAst:
     types.foreach: t =>
       val caseName = t._1
       writer.println(
-        s"    def visit$caseName$baseName(${baseName.toLowerCase()}: $baseName.$caseName): R",
+        s"    def visit$caseName$baseName(${baseName.toLowerCase()}: $baseName.$caseName): Environment ?=> R",
       )
 
     writer.close()

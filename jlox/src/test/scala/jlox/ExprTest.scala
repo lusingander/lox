@@ -41,25 +41,25 @@ class ExprTest extends LoxTestBase:
 
 class AstPrinter extends Expr.Visitor[String]:
 
-  def print(expr: Expr): String = expr.accept(this)
+  def print(expr: Expr): String = expr.accept(this)(using Environment())
 
-  override def visitBinaryExpr(expr: Expr.Binary): String =
+  override def visitBinaryExpr(expr: Expr.Binary): Environment ?=> String =
     parenthesize(expr.operator.lexeme, expr.left, expr.right)
 
-  override def visitGroupingExpr(expr: Expr.Grouping): String =
+  override def visitGroupingExpr(expr: Expr.Grouping): Environment ?=> String =
     parenthesize("group", expr.expression)
 
-  override def visitLiteralExpr(expr: Expr.Literal): String =
+  override def visitLiteralExpr(expr: Expr.Literal): Environment ?=> String =
     expr.value.toString()
 
-  override def visitUnaryExpr(expr: Expr.Unary): String =
+  override def visitUnaryExpr(expr: Expr.Unary): Environment ?=> String =
     parenthesize(expr.operator.lexeme, expr.right)
 
-  override def visitVariableExpr(expr: Expr.Variable): String = ???
+  override def visitVariableExpr(expr: Expr.Variable): Environment ?=> String = ???
 
-  override def visitAssignExpr(expr: Expr.Assign): String = ???
+  override def visitAssignExpr(expr: Expr.Assign): Environment ?=> String = ???
 
-  private def parenthesize(name: String, exprs: Expr*): String =
+  private def parenthesize(name: String, exprs: Expr*): Environment ?=> String =
     val b = mutable.StringBuilder()
     b.append("(")
     b.append(name)
@@ -71,18 +71,18 @@ class AstPrinter extends Expr.Visitor[String]:
 
 class RpnPrinter extends Expr.Visitor[String]:
 
-  def print(expr: Expr): String = expr.accept(this)
+  def print(expr: Expr): String = expr.accept(this)(using Environment())
 
-  override def visitBinaryExpr(expr: Expr.Binary): String =
+  override def visitBinaryExpr(expr: Expr.Binary): Environment ?=> String =
     s"${expr.left.accept(this)} ${expr.right.accept(this)} ${expr.operator.lexeme}"
 
-  override def visitGroupingExpr(expr: Expr.Grouping): String = ???
+  override def visitGroupingExpr(expr: Expr.Grouping): Environment ?=> String = ???
 
-  override def visitLiteralExpr(expr: Expr.Literal): String =
+  override def visitLiteralExpr(expr: Expr.Literal): Environment ?=> String =
     expr.value.toString()
 
-  override def visitUnaryExpr(expr: Expr.Unary): String = ???
+  override def visitUnaryExpr(expr: Expr.Unary): Environment ?=> String = ???
 
-  override def visitVariableExpr(expr: Expr.Variable): String = ???
+  override def visitVariableExpr(expr: Expr.Variable): Environment ?=> String = ???
 
-  override def visitAssignExpr(expr: Expr.Assign): String = ???
+  override def visitAssignExpr(expr: Expr.Assign): Environment ?=> String = ???

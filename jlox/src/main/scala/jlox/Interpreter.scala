@@ -2,48 +2,44 @@ package jlox
 
 class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
 
-  private var environment = Environment()
+  private given environment: Environment = Environment()
 
   def interpret(statements: Seq[Stmt]): Unit =
     try statements.foreach(execute)
     catch case e: RuntimeError => Lox.runtimeError(e)
 
-  private def evaluate(expr: Expr): LoxDataType =
+  private def evaluate(expr: Expr): Environment ?=> LoxDataType =
     expr.accept(this)
 
-  private def execute(stmt: Stmt): Unit =
+  private def execute(stmt: Stmt): Environment ?=> Unit =
     stmt.accept(this)
 
-  private def executeBlock(statements: Seq[Stmt], env: Environment): Unit =
-    val previous = environment
-    try
-      environment = env
-      statements.foreach: statement =>
-        execute(statement)
-    finally environment = previous
+  private def executeBlock(statements: Seq[Stmt]): Environment ?=> Unit =
+    statements.foreach: statement =>
+      execute(statement)
 
-  override def visitBlockStmt(stmt: Stmt.Block): Unit =
-    executeBlock(stmt.statements, Environment(Some(environment)))
+  override def visitBlockStmt(stmt: Stmt.Block): Environment ?=> Unit =
+    executeBlock(stmt.statements)(using Environment(Some(summon[Environment])))
 
-  override def visitExpressionStmt(stmt: Stmt.Expression): Unit =
+  override def visitExpressionStmt(stmt: Stmt.Expression): Environment ?=> Unit =
     evaluate(stmt.expression)
 
-  override def visitPrintStmt(stmt: Stmt.Print): Unit =
+  override def visitPrintStmt(stmt: Stmt.Print): Environment ?=> Unit =
     val value = evaluate(stmt.expression)
     println(value)
 
-  override def visitVarStmt(stmt: Stmt.Var): Unit =
+  override def visitVarStmt(stmt: Stmt.Var): Environment ?=> Unit =
     val value = stmt.initializer match
       case Some(initializer) => evaluate(initializer)
       case None              => LoxDataType.Nil
-    environment.define(stmt.name.lexeme, value)
+    summon[Environment].define(stmt.name.lexeme, value)
 
-  override def visitAssignExpr(expr: Expr.Assign): LoxDataType =
+  override def visitAssignExpr(expr: Expr.Assign): Environment ?=> LoxDataType =
     val value = evaluate(expr.value)
-    environment.assign(expr.name, value)
+    summon[Environment].assign(expr.name, value)
     value
 
-  override def visitBinaryExpr(expr: Expr.Binary): LoxDataType =
+  override def visitBinaryExpr(expr: Expr.Binary): Environment ?=> LoxDataType =
     val left = evaluate(expr.left)
     val right = evaluate(expr.right)
     expr.operator.tp match
@@ -87,13 +83,13 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
           case (_, _) => throw RuntimeError(expr.operator, "Operands must be numbers.")
       case _ => throw RuntimeError(expr.operator, s"Unexpected operator: ${expr.operator.tp}")
 
-  override def visitGroupingExpr(expr: Expr.Grouping): LoxDataType =
+  override def visitGroupingExpr(expr: Expr.Grouping): Environment ?=> LoxDataType =
     evaluate(expr.expression)
 
-  override def visitLiteralExpr(expr: Expr.Literal): LoxDataType =
+  override def visitLiteralExpr(expr: Expr.Literal): Environment ?=> LoxDataType =
     expr.value
 
-  override def visitUnaryExpr(expr: Expr.Unary): LoxDataType =
+  override def visitUnaryExpr(expr: Expr.Unary): Environment ?=> LoxDataType =
     val right = evaluate(expr.right)
     expr.operator.tp match
       case TokenType.Bang => LoxDataType.Bool(!isTruthy(right))
@@ -103,8 +99,8 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
           case _ => throw RuntimeError(expr.operator, "Operand must be a number.")
       case _ => throw RuntimeError(expr.operator, s"Unexpected operator: ${expr.operator.tp}")
 
-  override def visitVariableExpr(expr: Expr.Variable): LoxDataType =
-    environment.get(expr.name)
+  override def visitVariableExpr(expr: Expr.Variable): Environment ?=> LoxDataType =
+    summon[Environment].get(expr.name)
 
   private def isTruthy(obj: LoxDataType): Boolean =
     obj match
