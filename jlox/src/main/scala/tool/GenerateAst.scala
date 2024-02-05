@@ -19,14 +19,17 @@ class GenerateAst:
       ("Binary", "left: Expr, operator: Token, right: Expr"),
       ("Grouping", "expression: Expr"),
       ("Literal", "value: LoxDataType"),
+      ("Logical", "left: Expr, operator: Token, right: Expr"),
       ("Unary", "operator: Token, right: Expr"),
       ("Variable", "name: Token"),
     )
     val stmtTypes = Seq(
       ("Block", "statements: Seq[Stmt]"),
       ("Expression", "expression: Expr"),
+      ("If", "condition: Expr, thenBranch: Stmt, elseBranch: Option[Stmt]"),
       ("Print", "expression: Expr"),
       ("Var", "name: Token, initializer: Option[Expr]"),
+      ("While", "condition: Expr, body: Stmt"),
     )
     defineAst(outputDir, "Expr", exprTypes)
     defineAst(outputDir, "Stmt", stmtTypes)

@@ -24,6 +24,10 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
   override def visitExpressionStmt(stmt: Stmt.Expression): Environment ?=> Unit =
     evaluate(stmt.expression)
 
+  override def visitIfStmt(stmt: Stmt.If): Environment ?=> Unit =
+    if isTruthy(evaluate(stmt.condition)) then execute(stmt.thenBranch)
+    else stmt.elseBranch.foreach(execute)
+
   override def visitPrintStmt(stmt: Stmt.Print): Environment ?=> Unit =
     val value = evaluate(stmt.expression)
     println(value)
@@ -33,6 +37,9 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
       case Some(initializer) => evaluate(initializer)
       case None              => LoxDataType.Nil
     summon[Environment].define(stmt.name.lexeme, value)
+
+  override def visitWhileStmt(stmt: Stmt.While): Environment ?=> Unit =
+    while isTruthy(evaluate(stmt.condition)) do execute(stmt.body)
 
   override def visitAssignExpr(expr: Expr.Assign): Environment ?=> LoxDataType =
     val value = evaluate(expr.value)
@@ -88,6 +95,15 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
 
   override def visitLiteralExpr(expr: Expr.Literal): Environment ?=> LoxDataType =
     expr.value
+
+  override def visitLogicalExpr(expr: Expr.Logical): Environment ?=> LoxDataType =
+    val left = evaluate(expr.left)
+    expr.operator.tp match
+      case TokenType.Or =>
+        if isTruthy(left) then left else evaluate(expr.right)
+      case TokenType.And =>
+        if isTruthy(left) then evaluate(expr.right) else left
+      case _ => throw RuntimeError(expr.operator, s"Unexpected operator: ${expr.operator.tp}")
 
   override def visitUnaryExpr(expr: Expr.Unary): Environment ?=> LoxDataType =
     val right = evaluate(expr.right)

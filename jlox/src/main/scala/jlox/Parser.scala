@@ -24,7 +24,7 @@ class Parser(
     assignment()
 
   private def assignment(): Expr =
-    val expr = equality()
+    val expr = or()
     if `match`(TokenType.Equal) then
       val equals = previous()
       val value = assignment()
@@ -34,6 +34,22 @@ class Parser(
           error(equals, "Invalid assignment target.")
           expr
     else expr
+
+  private def or(): Expr =
+    var expr = and()
+    while `match`(TokenType.Or) do
+      val operator = previous()
+      val right = and()
+      expr = Expr.Logical(expr, operator, right)
+    expr
+
+  private def and(): Expr =
+    var expr = equality()
+    while `match`(TokenType.And) do
+      val operator = previous()
+      val right = equality()
+      expr = Expr.Logical(expr, operator, right)
+    expr
 
   private def declaration(): Stmt =
     try
@@ -45,14 +61,62 @@ class Parser(
         null
 
   private def statement(): Stmt =
-    if `match`(TokenType.Print) then printStatement()
+    if `match`(TokenType.For) then forStatement()
+    else if `match`(TokenType.If) then ifStatement()
+    else if `match`(TokenType.Print) then printStatement()
+    else if `match`(TokenType.While) then whileStatement()
     else if `match`(TokenType.LeftBrace) then Stmt.Block(block())
     else expressionStatement()
+
+  private def forStatement(): Stmt =
+    consume(TokenType.LeftParen, "Expect '(' after 'for'.")
+    val initializer =
+      if `match`(TokenType.Semicolon) then None
+      else if `match`(TokenType.Var) then Some(varDeclaration())
+      else Some(expressionStatement())
+    val condition =
+      if check(TokenType.Semicolon) then None
+      else Some(expression())
+    consume(TokenType.Semicolon, "Expect ';' after loop condition.")
+    val increment =
+      if check(TokenType.RightParen) then None
+      else Some(expression())
+    consume(TokenType.RightParen, "Expect ')' after for clauses.")
+
+    val body = statement()
+
+    val bodyPlusIncrement = increment match
+      case Some(inc) => Stmt.Block(Seq(body, Stmt.Expression(inc)))
+      case None      => body
+    val conditionReplaced = condition match
+      case Some(cond) => cond
+      case None       => Expr.Literal(LoxDataType.Bool(true))
+
+    val whileBody = Stmt.While(conditionReplaced, bodyPlusIncrement)
+
+    initializer match
+      case Some(init) => Stmt.Block(Seq(init, whileBody))
+      case None       => whileBody
+
+  private def ifStatement(): Stmt =
+    consume(TokenType.LeftParen, "Expect '(' after 'if'.")
+    val condition = expression()
+    consume(TokenType.RightParen, "Expect ')' after if condition.")
+    val thenBranch = statement()
+    val elseBranch = if `match`(TokenType.Else) then Some(statement()) else None
+    Stmt.If(condition, thenBranch, elseBranch)
 
   private def printStatement(): Stmt =
     val value = expression()
     consume(TokenType.Semicolon, "Expect ';' after value.")
     Stmt.Print(value)
+
+  private def whileStatement(): Stmt =
+    consume(TokenType.LeftParen, "Expect '(' after 'while'.")
+    val condition = expression()
+    consume(TokenType.RightParen, "Expect ')' after condition.")
+    val body = statement()
+    Stmt.While(condition, body)
 
   private def varDeclaration(): Stmt =
     val name = consume(TokenType.Identifier, "Expect variable name.")

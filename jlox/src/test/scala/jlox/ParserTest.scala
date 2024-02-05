@@ -123,3 +123,71 @@ class ParserTest extends LoxTestBase:
     )
     val actual = sut.parse()
     assert(actual == expected)
+
+  test("for"):
+    val tokens = Seq(
+      token(TokenType.For, "for"),
+      token(TokenType.LeftParen, "("),
+      token(TokenType.Var, "var"),
+      token(TokenType.Identifier, "i"),
+      token(TokenType.Equal, "="),
+      token(TokenType.Number, "1", LoxDataType.Number(1)),
+      token(TokenType.Semicolon, ";"),
+      token(TokenType.Identifier, "i"),
+      token(TokenType.Less, "<"),
+      token(TokenType.Number, "5", LoxDataType.Number(5)),
+      token(TokenType.Semicolon, ";"),
+      token(TokenType.Identifier, "i"),
+      token(TokenType.Equal, "="),
+      token(TokenType.Identifier, "i"),
+      token(TokenType.Plus, "+"),
+      token(TokenType.Number, "1", LoxDataType.Number(1)),
+      token(TokenType.RightParen, ")"),
+      token(TokenType.LeftBrace, "{"),
+      token(TokenType.Print, "print"),
+      token(TokenType.Identifier, "i"),
+      token(TokenType.Semicolon, ";"),
+      token(TokenType.RightBrace, "}"),
+      token(TokenType.Eof, ""),
+    )
+    val sut = Parser(tokens)
+    val expected = Seq(
+      Stmt.Block(
+        statements = Seq(
+          Stmt.Var(
+            name = token(TokenType.Identifier, "i"),
+            initializer = Some(Expr.Literal(LoxDataType.Number(1))),
+          ),
+          Stmt.While(
+            condition = Expr.Binary(
+              left = Expr.Variable(token(TokenType.Identifier, "i")),
+              operator = token(TokenType.Less, "<"),
+              right = Expr.Literal(LoxDataType.Number(5)),
+            ),
+            body = Stmt.Block(
+              statements = Seq(
+                Stmt.Block(
+                  statements = Seq(
+                    Stmt.Print(
+                      expression = Expr.Variable(token(TokenType.Identifier, "i")),
+                    ),
+                  ),
+                ),
+                Stmt.Expression(
+                  expression = Expr.Assign(
+                    name = token(TokenType.Identifier, "i"),
+                    value = Expr.Binary(
+                      left = Expr.Variable(token(TokenType.Identifier, "i")),
+                      operator = token(TokenType.Plus, "+"),
+                      right = Expr.Literal(LoxDataType.Number(1)),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    )
+    val actual = sut.parse()
+    assert(actual == expected)

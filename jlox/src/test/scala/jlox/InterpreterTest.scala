@@ -227,6 +227,110 @@ class InterpreterTest extends LoxTestBase:
         |""".stripMargin
     assertStdout(sut.interpret(stmts))(expected)
 
+  test("if"):
+    val sut = Interpreter()
+    val stmts = Seq(
+      Stmt.If(
+        condition = Expr.Literal(LoxDataType.Bool(true)),
+        thenBranch = printLiteralStmt(1),
+        elseBranch = None,
+      ),
+      Stmt.If(
+        condition = Expr.Literal(LoxDataType.Bool(false)),
+        thenBranch = printLiteralStmt(2),
+        elseBranch = None,
+      ),
+      Stmt.If(
+        condition = Expr.Literal(LoxDataType.Number(0)),
+        thenBranch = printLiteralStmt(3),
+        elseBranch = Some(printLiteralStmt(4)),
+      ),
+      Stmt.If(
+        condition = Expr.Literal(LoxDataType.Nil),
+        thenBranch = printLiteralStmt(5),
+        elseBranch = Some(printLiteralStmt(6)),
+      ),
+    )
+    val expected =
+      """1
+        |3
+        |6
+        |""".stripMargin
+    assertStdout(sut.interpret(stmts))(expected)
+
+  test("and, or"):
+    val sut = Interpreter()
+    val stmts = Seq(
+      Stmt.Print(
+        expression = Expr.Logical(
+          left = literal(true),
+          operator = token(TokenType.And, "and"),
+          right = literal(1),
+        ),
+      ),
+      Stmt.Print(
+        expression = Expr.Logical(
+          left = literal(false),
+          operator = token(TokenType.And, "and"),
+          right = literal(2),
+        ),
+      ),
+      Stmt.Print(
+        expression = Expr.Logical(
+          left = literal("foo"),
+          operator = token(TokenType.Or, "or"),
+          right = literal("bar"),
+        ),
+      ),
+      Stmt.Print(
+        expression = Expr.Logical(
+          left = literal("nil"),
+          operator = token(TokenType.Or, "or"),
+          right = literal(3),
+        ),
+      ),
+    )
+    val expected =
+      """1
+        |false
+        |foo
+        |3
+        |""".stripMargin
+    assertStdout(sut.interpret(stmts))(expected)
+
+  test("while"):
+    val sut = Interpreter()
+    val stmts = Seq(
+      varStmt("i", 1),
+      Stmt.While(
+        condition = Expr.Binary(
+          left = Expr.Variable(token(TokenType.Identifier, "i")),
+          operator = token(TokenType.Less, "<"),
+          right = literal(5),
+        ),
+        body = blockStmt(
+          printVarStmt("i"),
+          Stmt.Expression(
+            expression = Expr.Assign(
+              name = token(TokenType.Identifier, "i"),
+              value = Expr.Binary(
+                left = Expr.Variable(token(TokenType.Identifier, "i")),
+                operator = token(TokenType.Plus, "+"),
+                right = literal(1),
+              ),
+            ),
+          ),
+        ),
+      ),
+    )
+    val expected =
+      """1
+        |2
+        |3
+        |4
+        |""".stripMargin
+    assertStdout(sut.interpret(stmts))(expected)
+
   private def testSimpleBinaryExpr(
       left: LoxDataType,
       right: LoxDataType,
@@ -257,11 +361,11 @@ class InterpreterTest extends LoxTestBase:
 
   private def varStmt(
       name: String,
-      value: String,
+      value: "nil" | Double | String | Boolean,
   ): Stmt.Var =
     Stmt.Var(
       name = token(TokenType.Identifier, name),
-      initializer = Some(Expr.Literal(LoxDataType.String(value))),
+      initializer = Some(literal(value)),
     )
 
   private def printVarStmt(
@@ -275,3 +379,20 @@ class InterpreterTest extends LoxTestBase:
       statements: Stmt*,
   ): Stmt.Block =
     Stmt.Block(statements)
+
+  private def printLiteralStmt(
+      value: "nil" | Double | String | Boolean,
+  ): Stmt.Print =
+    Stmt.Print(
+      expression = literal(value),
+    )
+
+  private def literal(
+      value: "nil" | Double | String | Boolean,
+  ): Expr.Literal =
+    val literal = value match
+      case v: "nil"   => LoxDataType.Nil
+      case v: Double  => LoxDataType.Number(v)
+      case v: String  => LoxDataType.String(v)
+      case v: Boolean => LoxDataType.Bool(v)
+    Expr.Literal(literal)

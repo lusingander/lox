@@ -52,6 +52,8 @@ class AstPrinter extends Expr.Visitor[String]:
   override def visitLiteralExpr(expr: Expr.Literal): Environment ?=> String =
     expr.value.toString()
 
+  override def visitLogicalExpr(expr: Expr.Logical): Environment ?=> String = ???
+
   override def visitUnaryExpr(expr: Expr.Unary): Environment ?=> String =
     parenthesize(expr.operator.lexeme, expr.right)
 
@@ -80,6 +82,8 @@ class RpnPrinter extends Expr.Visitor[String]:
 
   override def visitLiteralExpr(expr: Expr.Literal): Environment ?=> String =
     expr.value.toString()
+
+  override def visitLogicalExpr(expr: Expr.Logical): Environment ?=> String = ???
 
   override def visitUnaryExpr(expr: Expr.Unary): Environment ?=> String = ???
 

@@ -20,6 +20,10 @@ object Expr:
     override def accept[R](visitor: Visitor[R]): Environment ?=> R =
       visitor.visitLiteralExpr(this)
 
+  case class Logical(left: Expr, operator: Token, right: Expr) extends Expr:
+    override def accept[R](visitor: Visitor[R]): Environment ?=> R =
+      visitor.visitLogicalExpr(this)
+
   case class Unary(operator: Token, right: Expr) extends Expr:
     override def accept[R](visitor: Visitor[R]): Environment ?=> R =
       visitor.visitUnaryExpr(this)
@@ -33,5 +37,6 @@ object Expr:
     def visitBinaryExpr(expr: Expr.Binary): Environment ?=> R
     def visitGroupingExpr(expr: Expr.Grouping): Environment ?=> R
     def visitLiteralExpr(expr: Expr.Literal): Environment ?=> R
+    def visitLogicalExpr(expr: Expr.Logical): Environment ?=> R
     def visitUnaryExpr(expr: Expr.Unary): Environment ?=> R
     def visitVariableExpr(expr: Expr.Variable): Environment ?=> R
