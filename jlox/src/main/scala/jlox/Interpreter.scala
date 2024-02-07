@@ -2,7 +2,10 @@ package jlox
 
 class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
 
-  private given environment: Environment = Environment()
+  val global: Environment = Environment()
+  global.define("clock", Global.clock)
+
+  private given environment: Environment = global
 
   def interpret(statements: Seq[Stmt]): Unit =
     try statements.foreach(execute)
@@ -14,7 +17,7 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
   private def execute(stmt: Stmt): Environment ?=> Unit =
     stmt.accept(this)
 
-  private def executeBlock(statements: Seq[Stmt]): Environment ?=> Unit =
+  def executeBlock(statements: Seq[Stmt]): Environment ?=> Unit =
     statements.foreach: statement =>
       execute(statement)
 
@@ -23,6 +26,10 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
 
   override def visitExpressionStmt(stmt: Stmt.Expression): Environment ?=> Unit =
     evaluate(stmt.expression)
+
+  override def visitFunctionStmt(stmt: Stmt.Function): Environment ?=> Unit =
+    val function = LoxFunction(stmt)
+    environment.define(stmt.name.lexeme, LoxDataType.Function(function))
 
   override def visitIfStmt(stmt: Stmt.If): Environment ?=> Unit =
     if isTruthy(evaluate(stmt.condition)) then execute(stmt.thenBranch)
@@ -90,6 +97,20 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
           case (_, _) => throw RuntimeError(expr.operator, "Operands must be numbers.")
       case _ => throw RuntimeError(expr.operator, s"Unexpected operator: ${expr.operator.tp}")
 
+  override def visitCallExpr(expr: Expr.Call): Environment ?=> LoxDataType =
+    val callee = evaluate(expr.callee)
+    val arguments = expr.arguments.map(evaluate)
+
+    callee match
+      case LoxDataType.Function(function) =>
+        if arguments.size != function.arity() then
+          throw RuntimeError(
+            expr.paren,
+            s"Expected ${function.arity()} arguments but got ${arguments.size}.",
+          )
+        function.call(this, arguments)
+      case _ => throw RuntimeError(expr.paren, "Can only call functions and classes.")
+
   override def visitGroupingExpr(expr: Expr.Grouping): Environment ?=> LoxDataType =
     evaluate(expr.expression)
 
@@ -120,7 +141,8 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
 
   private def isTruthy(obj: LoxDataType): Boolean =
     obj match
-      case LoxDataType.Number(_) => true
-      case LoxDataType.String(_) => true
-      case LoxDataType.Bool(v)   => v
-      case LoxDataType.Nil       => false
+      case LoxDataType.Number(_)   => true
+      case LoxDataType.String(_)   => true
+      case LoxDataType.Bool(v)     => v
+      case LoxDataType.Nil         => false
+      case LoxDataType.Function(_) => true

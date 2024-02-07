@@ -12,6 +12,10 @@ object Expr:
     override def accept[R](visitor: Visitor[R]): Environment ?=> R =
       visitor.visitBinaryExpr(this)
 
+  case class Call(callee: Expr, paren: Token, arguments: Seq[Expr]) extends Expr:
+    override def accept[R](visitor: Visitor[R]): Environment ?=> R =
+      visitor.visitCallExpr(this)
+
   case class Grouping(expression: Expr) extends Expr:
     override def accept[R](visitor: Visitor[R]): Environment ?=> R =
       visitor.visitGroupingExpr(this)
@@ -35,6 +39,7 @@ object Expr:
   trait Visitor[R]:
     def visitAssignExpr(expr: Expr.Assign): Environment ?=> R
     def visitBinaryExpr(expr: Expr.Binary): Environment ?=> R
+    def visitCallExpr(expr: Expr.Call): Environment ?=> R
     def visitGroupingExpr(expr: Expr.Grouping): Environment ?=> R
     def visitLiteralExpr(expr: Expr.Literal): Environment ?=> R
     def visitLogicalExpr(expr: Expr.Logical): Environment ?=> R

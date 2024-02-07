@@ -6,6 +6,11 @@ lazy val root = project
     name := "jlox",
     version := "0.1.0-SNAPSHOT",
     scalaVersion := scala3Version,
+    scalacOptions ++= Seq(
+      "-unchecked",
+      "-feature",
+      "-deprecation",
+    ),
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" % "3.2.17" % Test,
     ),

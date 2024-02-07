@@ -17,6 +17,7 @@ class GenerateAst:
     val exprTypes = Seq(
       ("Assign", "name: Token, value: Expr"),
       ("Binary", "left: Expr, operator: Token, right: Expr"),
+      ("Call", "callee: Expr, paren: Token, arguments: Seq[Expr]"),
       ("Grouping", "expression: Expr"),
       ("Literal", "value: LoxDataType"),
       ("Logical", "left: Expr, operator: Token, right: Expr"),
@@ -26,6 +27,7 @@ class GenerateAst:
     val stmtTypes = Seq(
       ("Block", "statements: Seq[Stmt]"),
       ("Expression", "expression: Expr"),
+      ("Function", "name: Token, params: Seq[Token], body: Seq[Stmt]"),
       ("If", "condition: Expr, thenBranch: Stmt, elseBranch: Option[Stmt]"),
       ("Print", "expression: Expr"),
       ("Var", "name: Token, initializer: Option[Expr]"),

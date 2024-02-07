@@ -47,7 +47,8 @@ class Parser(
 
   private def declaration(): Stmt =
     try
-      if `match`(TokenType.Var) then varDeclaration()
+      if `match`(TokenType.Fun) then function("function")
+      else if `match`(TokenType.Var) then varDeclaration()
       else statement()
     catch
       case e: ParseError =>
@@ -123,6 +124,21 @@ class Parser(
     consume(TokenType.Semicolon, "Expect ';' after expression.")
     Stmt.Expression(expr)
 
+  private def function(kind: String): Stmt =
+    val name = consume(TokenType.Identifier, s"Expect $kind name.")
+    consume(TokenType.LeftParen, s"Expect '(' after $kind name.")
+    val parameters = mutable.ListBuffer.empty[Token]
+    if !check(TokenType.RightParen) then
+      while
+        if parameters.size >= 255 then error(peek(), "Can't have more than 255 parameters.")
+        parameters.addOne(consume(TokenType.Identifier, "Expect parameter name."))
+        `match`(TokenType.Comma)
+      do ()
+    consume(TokenType.RightParen, "Expect ')' after parameters.")
+    consume(TokenType.LeftBrace, s"Expect '{' before $kind body.")
+    val body = block()
+    Stmt.Function(name, parameters.toSeq, body)
+
   private def block(): Seq[Stmt] =
     val statements = mutable.ListBuffer.empty[Stmt]
     while !check(TokenType.RightBrace) && !isAtEnd() do statements.addOne(declaration())
@@ -167,7 +183,27 @@ class Parser(
       val operator = previous()
       val right = unary()
       Expr.Unary(operator, right)
-    else primary()
+    else call()
+
+  private def call(): Expr =
+    import scala.util.control.Breaks.*
+    var expr = primary()
+    breakable:
+      while true do
+        if `match`(TokenType.LeftParen) then expr = finishCall(expr)
+        else break
+    expr
+
+  private def finishCall(callee: Expr): Expr =
+    val arguments = mutable.ListBuffer.empty[Expr]
+    if !check(TokenType.RightParen) then
+      while
+        if arguments.size >= 255 then error(peek(), "Can't have more then 255 arguments.")
+        arguments.addOne(expression())
+        `match`(TokenType.Comma)
+      do ()
+    val paren = consume(TokenType.RightParen, "Expect ')' after arguments.")
+    Expr.Call(callee, paren, arguments.toSeq)
 
   private def primary(): Expr =
     if `match`(TokenType.False) then Expr.Literal(LoxDataType.Bool(false))

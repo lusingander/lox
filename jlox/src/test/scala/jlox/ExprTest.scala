@@ -46,6 +46,8 @@ class AstPrinter extends Expr.Visitor[String]:
   override def visitBinaryExpr(expr: Expr.Binary): Environment ?=> String =
     parenthesize(expr.operator.lexeme, expr.left, expr.right)
 
+  override def visitCallExpr(expr: Expr.Call): Environment ?=> String = ???
+
   override def visitGroupingExpr(expr: Expr.Grouping): Environment ?=> String =
     parenthesize("group", expr.expression)
 
@@ -77,6 +79,8 @@ class RpnPrinter extends Expr.Visitor[String]:
 
   override def visitBinaryExpr(expr: Expr.Binary): Environment ?=> String =
     s"${expr.left.accept(this)} ${expr.right.accept(this)} ${expr.operator.lexeme}"
+
+  override def visitCallExpr(expr: Expr.Call): Environment ?=> String = ???
 
   override def visitGroupingExpr(expr: Expr.Grouping): Environment ?=> String = ???
 

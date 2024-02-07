@@ -228,6 +228,53 @@ class LoxTest extends LoxTestBase:
         |""".stripMargin
     assertOutput(run(source))(expected)
 
+  test("function"):
+    val source =
+      """
+        |print "";
+        |
+        |fun hello(name) {
+        |  print "Hello, " + name + "!";
+        |}
+        |
+        |hello("World");
+        |hello("Lox");
+        |
+        |fun print_add(a, b, c) {
+        |  var sum = a + b + c;
+        |  print sum;
+        |}
+        |
+        |print_add(1, 2, 3);
+        |print_add(-10, 2 * 3, 0.5);
+        |print_add("foo", "bar", "baz");
+        |
+        |fun print_fib(a, b) {
+        |  if (a < 10) {
+        |    print a;
+        |    print_fib(b, a + b);
+        |  }
+        |}
+        |
+        |print_fib(1, 1);
+        |
+        |""".stripMargin
+    val expected =
+      """
+        |Hello, World!
+        |Hello, Lox!
+        |6
+        |-3.5
+        |foobarbaz
+        |1
+        |1
+        |2
+        |3
+        |5
+        |8
+        |""".stripMargin
+    assertOutput(run(source))(expected)
+
   private def run(source: String): Unit =
     val tokens = Scanner(source).scanTokens()
     val statements = Parser(tokens).parse()

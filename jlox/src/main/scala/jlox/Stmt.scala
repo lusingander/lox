@@ -12,6 +12,10 @@ object Stmt:
     override def accept[R](visitor: Visitor[R]): Environment ?=> R =
       visitor.visitExpressionStmt(this)
 
+  case class Function(name: Token, params: Seq[Token], body: Seq[Stmt]) extends Stmt:
+    override def accept[R](visitor: Visitor[R]): Environment ?=> R =
+      visitor.visitFunctionStmt(this)
+
   case class If(condition: Expr, thenBranch: Stmt, elseBranch: Option[Stmt]) extends Stmt:
     override def accept[R](visitor: Visitor[R]): Environment ?=> R =
       visitor.visitIfStmt(this)
@@ -31,6 +35,7 @@ object Stmt:
   trait Visitor[R]:
     def visitBlockStmt(stmt: Stmt.Block): Environment ?=> R
     def visitExpressionStmt(stmt: Stmt.Expression): Environment ?=> R
+    def visitFunctionStmt(stmt: Stmt.Function): Environment ?=> R
     def visitIfStmt(stmt: Stmt.If): Environment ?=> R
     def visitPrintStmt(stmt: Stmt.Print): Environment ?=> R
     def visitVarStmt(stmt: Stmt.Var): Environment ?=> R
