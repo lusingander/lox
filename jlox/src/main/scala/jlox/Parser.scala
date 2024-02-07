@@ -59,6 +59,7 @@ class Parser(
     if `match`(TokenType.For) then forStatement()
     else if `match`(TokenType.If) then ifStatement()
     else if `match`(TokenType.Print) then printStatement()
+    else if `match`(TokenType.Return) then returnStatement()
     else if `match`(TokenType.While) then whileStatement()
     else if `match`(TokenType.LeftBrace) then Stmt.Block(block())
     else expressionStatement()
@@ -105,6 +106,14 @@ class Parser(
     val value = expression()
     consume(TokenType.Semicolon, "Expect ';' after value.")
     Stmt.Print(value)
+
+  private def returnStatement(): Stmt =
+    val keyword = previous()
+    val value =
+      if check(TokenType.Semicolon) then None
+      else Some(expression())
+    consume(TokenType.Semicolon, "Expect ',' after return value.")
+    Stmt.Return(keyword, value)
 
   private def whileStatement(): Stmt =
     consume(TokenType.LeftParen, "Expect '(' after 'while'.")

@@ -228,7 +228,7 @@ class LoxTest extends LoxTestBase:
         |""".stripMargin
     assertOutput(run(source))(expected)
 
-  test("function"):
+  test("function 1"):
     val source =
       """
         |print "";
@@ -272,6 +272,54 @@ class LoxTest extends LoxTestBase:
         |3
         |5
         |8
+        |""".stripMargin
+    assertOutput(run(source))(expected)
+
+  test("function 2"):
+    val source =
+      """
+        |print "";
+        |
+        |fun fib(n) {
+        |  if (n <= 1)
+        |    return n;
+        |  return fib(n - 2) + fib(n - 1);
+        |}
+        |
+        |for (var i = 0; i < 10; i = i + 1) {
+        |  print fib(i);
+        |}
+        |
+        |fun makeCounter() {
+        |  var i = 0;
+        |  fun count() {
+        |    i = i + 1;
+        |    print i;
+        |  }
+        |  return count;
+        |}
+        |
+        |var counter = makeCounter();
+        |counter();
+        |counter();
+        |counter();
+        |
+        |""".stripMargin
+    val expected =
+      """
+        |0
+        |1
+        |1
+        |2
+        |3
+        |5
+        |8
+        |13
+        |21
+        |34
+        |1
+        |2
+        |3
         |""".stripMargin
     assertOutput(run(source))(expected)
 

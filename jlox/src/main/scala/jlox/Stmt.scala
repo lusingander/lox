@@ -24,6 +24,10 @@ object Stmt:
     override def accept[R](visitor: Visitor[R]): Environment ?=> R =
       visitor.visitPrintStmt(this)
 
+  case class Return(keyword: Token, value: Option[Expr]) extends Stmt:
+    override def accept[R](visitor: Visitor[R]): Environment ?=> R =
+      visitor.visitReturnStmt(this)
+
   case class Var(name: Token, initializer: Option[Expr]) extends Stmt:
     override def accept[R](visitor: Visitor[R]): Environment ?=> R =
       visitor.visitVarStmt(this)
@@ -38,5 +42,6 @@ object Stmt:
     def visitFunctionStmt(stmt: Stmt.Function): Environment ?=> R
     def visitIfStmt(stmt: Stmt.If): Environment ?=> R
     def visitPrintStmt(stmt: Stmt.Print): Environment ?=> R
+    def visitReturnStmt(stmt: Stmt.Return): Environment ?=> R
     def visitVarStmt(stmt: Stmt.Var): Environment ?=> R
     def visitWhileStmt(stmt: Stmt.While): Environment ?=> R

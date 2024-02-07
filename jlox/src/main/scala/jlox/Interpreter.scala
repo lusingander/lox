@@ -2,6 +2,8 @@ package jlox
 
 class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
 
+  import Interpreter.*
+
   val global: Environment = Environment()
   global.define("clock", Global.clock)
 
@@ -28,7 +30,7 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
     evaluate(stmt.expression)
 
   override def visitFunctionStmt(stmt: Stmt.Function): Environment ?=> Unit =
-    val function = LoxFunction(stmt)
+    val function = LoxFunction(stmt, summon[Environment])
     environment.define(stmt.name.lexeme, LoxDataType.Function(function))
 
   override def visitIfStmt(stmt: Stmt.If): Environment ?=> Unit =
@@ -38,6 +40,12 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
   override def visitPrintStmt(stmt: Stmt.Print): Environment ?=> Unit =
     val value = evaluate(stmt.expression)
     println(value)
+
+  override def visitReturnStmt(stmt: Stmt.Return): Environment ?=> Unit =
+    val value = stmt.value match
+      case Some(v) => evaluate(v)
+      case None    => LoxDataType.Nil
+    throw Return(value)
 
   override def visitVarStmt(stmt: Stmt.Var): Environment ?=> Unit =
     val value = stmt.initializer match
@@ -146,3 +154,6 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
       case LoxDataType.Bool(v)     => v
       case LoxDataType.Nil         => false
       case LoxDataType.Function(_) => true
+
+object Interpreter:
+  class Return(val value: LoxDataType) extends RuntimeException(null, null, false, false)

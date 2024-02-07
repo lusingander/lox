@@ -30,6 +30,7 @@ class GenerateAst:
       ("Function", "name: Token, params: Seq[Token], body: Seq[Stmt]"),
       ("If", "condition: Expr, thenBranch: Stmt, elseBranch: Option[Stmt]"),
       ("Print", "expression: Expr"),
+      ("Return", "keyword: Token, value: Option[Expr]"),
       ("Var", "name: Token, initializer: Option[Expr]"),
       ("While", "condition: Expr, body: Stmt"),
     )
