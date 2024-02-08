@@ -1,7 +1,7 @@
 package jlox
 
-import java.lang.{String => ScalaString}
-import scala.{Double => ScalaDouble, Boolean => ScalaBoolean}
+import java.lang.{String as ScalaString}
+import scala.{Double as ScalaDouble, Boolean as ScalaBoolean}
 
 enum LoxDataType:
   case Number(value: ScalaDouble)
