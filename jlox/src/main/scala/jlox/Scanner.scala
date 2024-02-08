@@ -3,12 +3,12 @@ package jlox
 import scala.collection.mutable
 
 class Scanner(
-    val source: String,
+    private val source: String,
 ):
-  val tokens: mutable.ListBuffer[Token] = mutable.ListBuffer.empty
-  var start: Int = 0
-  var current: Int = 0
-  var line: Int = 1
+  private val tokens: mutable.ListBuffer[Token] = mutable.ListBuffer.empty
+  private var start: Int = 0
+  private var current: Int = 0
+  private var line: Int = 1
 
   import Scanner.*
 

@@ -3,7 +3,7 @@ package jlox
 import scala.collection.mutable
 
 class Environment(
-    val enclosing: Option[Environment] = None,
+    private val enclosing: Option[Environment] = None,
 ):
   private val values = mutable.Map.empty[String, LoxDataType]
 

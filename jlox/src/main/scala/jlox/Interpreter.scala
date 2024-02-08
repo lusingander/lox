@@ -6,7 +6,7 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
 
   import Interpreter.*
 
-  val global: Environment = Environment()
+  private val global: Environment = Environment()
   global.define("clock", Global.clock)
 
   private given environment: Environment = global

@@ -127,5 +127,4 @@ class Resolver(
 
 object Resolver:
   private enum FunctionType:
-    case None
-    case Function
+    case None, Function

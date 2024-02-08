@@ -3,9 +3,9 @@ package jlox
 import scala.collection.mutable
 
 class Parser(
-    val tokens: Seq[Token],
+    private val tokens: Seq[Token],
 ):
-  var current: Int = 0
+  private var current: Int = 0
 
   import Parser.*
 

@@ -16,7 +16,7 @@ enum LoxDataType:
         val text = v.toString()
         if text.endsWith(".0") then text.substring(0, text.size - 2)
         else text
-      case LoxDataType.String(v) => v.toString()
-      case LoxDataType.Bool(v)   => v.toString()
-      case LoxDataType.Nil       => "nil"
-      case Function(v)           => v.toString()
+      case LoxDataType.String(v)   => v.toString()
+      case LoxDataType.Bool(v)     => v.toString()
+      case LoxDataType.Nil         => "nil"
+      case LoxDataType.Function(v) => v.toString()
