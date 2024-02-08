@@ -50,6 +50,8 @@ object Lox:
     val resolver = Resolver(interpreter)
     resolver.resolve(statements)
 
+    if hadError then return
+
     interpreter.interpret(statements)
 
   def error(line: Int, message: String): Unit =

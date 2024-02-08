@@ -7,9 +7,12 @@ class Resolver(
 ) extends Expr.Visitor[Unit]
     with Stmt.Visitor[Unit]:
 
+  import Resolver.*
+
   private given dummyEnvironment: Environment = Environment()
 
   private val scopes: mutable.Stack[mutable.Map[String, Boolean]] = mutable.Stack.empty
+  private var currentFunction: FunctionType = FunctionType.None
 
   def resolve(statements: Seq[Stmt]): Unit =
     statements.foreach(resolve)
@@ -20,13 +23,18 @@ class Resolver(
   private def resolve(expr: Expr): Unit =
     expr.accept(this)
 
-  private def resolveFunction(function: Stmt.Function): Unit =
+  private def resolveFunction(function: Stmt.Function, ft: FunctionType): Unit =
+    val enclosingFunction = currentFunction
+    currentFunction = ft
+
     beginScope()
     function.params.foreach: param =>
       declare(param)
       define(param)
     resolve(function.body)
     endScope()
+
+    currentFunction = enclosingFunction
 
   private def beginScope(): Unit =
     scopes.push(mutable.Map.empty)
@@ -36,6 +44,8 @@ class Resolver(
 
   private def declare(name: Token): Unit =
     scopes.headOption.foreach: scope =>
+      if scope.contains(name.lexeme) then
+        Lox.error(name, "Already a variable with this namein this scope.")
       scope.put(name.lexeme, false)
 
   private def define(name: Token): Unit =
@@ -60,7 +70,7 @@ class Resolver(
   override def visitFunctionStmt(stmt: Stmt.Function): Environment ?=> Unit =
     declare(stmt.name)
     define(stmt.name)
-    resolveFunction(stmt)
+    resolveFunction(stmt, FunctionType.Function)
 
   override def visitIfStmt(stmt: Stmt.If): Environment ?=> Unit =
     resolve(stmt.condition)
@@ -71,6 +81,8 @@ class Resolver(
     resolve(stmt.expression)
 
   override def visitReturnStmt(stmt: Stmt.Return): Environment ?=> Unit =
+    if currentFunction == FunctionType.None then
+      Lox.error(stmt.keyword, "Can't return from top-level code.")
     stmt.value.foreach(resolve)
 
   override def visitVarStmt(stmt: Stmt.Var): Environment ?=> Unit =
@@ -112,3 +124,8 @@ class Resolver(
     if scopes.headOption.flatMap(_.get(expr.name.lexeme)).exists(_ == false) then
       Lox.error(expr.name, "Can't read local variable in its own initializer.")
     resolveLocal(expr, expr.name)
+
+object Resolver:
+  private enum FunctionType:
+    case None
+    case Function
