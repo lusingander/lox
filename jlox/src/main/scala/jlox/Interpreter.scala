@@ -1,5 +1,7 @@
 package jlox
 
+import scala.collection.mutable
+
 class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
 
   import Interpreter.*
@@ -8,6 +10,7 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
   global.define("clock", Global.clock)
 
   private given environment: Environment = global
+  private val locals: mutable.Map[String, Int] = mutable.Map.empty
 
   def interpret(statements: Seq[Stmt]): Unit =
     try statements.foreach(execute)
@@ -18,6 +21,9 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
 
   private def execute(stmt: Stmt): Environment ?=> Unit =
     stmt.accept(this)
+
+  def resolve(expr: Expr, depth: Int): Unit =
+    locals.put(genLocalsKey(expr), depth)
 
   def executeBlock(statements: Seq[Stmt]): Environment ?=> Unit =
     statements.foreach: statement =>
@@ -31,7 +37,7 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
 
   override def visitFunctionStmt(stmt: Stmt.Function): Environment ?=> Unit =
     val function = LoxFunction(stmt, summon[Environment])
-    environment.define(stmt.name.lexeme, LoxDataType.Function(function))
+    summon[Environment].define(stmt.name.lexeme, LoxDataType.Function(function))
 
   override def visitIfStmt(stmt: Stmt.If): Environment ?=> Unit =
     if isTruthy(evaluate(stmt.condition)) then execute(stmt.thenBranch)
@@ -58,7 +64,10 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
 
   override def visitAssignExpr(expr: Expr.Assign): Environment ?=> LoxDataType =
     val value = evaluate(expr.value)
-    summon[Environment].assign(expr.name, value)
+    val distance = locals.get(genLocalsKey(expr))
+    distance match
+      case Some(dist) => summon[Environment].assignAt(dist, expr.name, value)
+      case None       => global.assign(expr.name, value)
     value
 
   override def visitBinaryExpr(expr: Expr.Binary): Environment ?=> LoxDataType =
@@ -145,7 +154,13 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
       case _ => throw RuntimeError(expr.operator, s"Unexpected operator: ${expr.operator.tp}")
 
   override def visitVariableExpr(expr: Expr.Variable): Environment ?=> LoxDataType =
-    summon[Environment].get(expr.name)
+    lookUpVariable(expr.name, expr)
+
+  private def lookUpVariable(name: Token, expr: Expr): Environment ?=> LoxDataType =
+    val distance = locals.get(genLocalsKey(expr))
+    distance match
+      case Some(dist) => summon[Environment].getAt(dist, name)
+      case None       => global.get(name)
 
   private def isTruthy(obj: LoxDataType): Boolean =
     obj match
@@ -154,6 +169,11 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
       case LoxDataType.Bool(v)     => v
       case LoxDataType.Nil         => false
       case LoxDataType.Function(_) => true
+
+  private def genLocalsKey(expr: Expr): String =
+    // Get the hashCode for each instance according to the book... :(
+    val h = System.identityHashCode(expr)
+    h.toString() + expr.hashCode().toString()
 
 object Interpreter:
   class Return(val value: LoxDataType) extends RuntimeException(null, null, false, false)

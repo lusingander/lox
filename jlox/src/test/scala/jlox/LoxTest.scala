@@ -323,7 +323,33 @@ class LoxTest extends LoxTestBase:
         |""".stripMargin
     assertOutput(run(source))(expected)
 
+  test("function 3"):
+    val source =
+      """
+        |print "";
+        |
+        |var a = "global";
+        |{
+        |  fun showA() {
+        |    print a;
+        |  }
+        |
+        |  showA();
+        |  var a = "block";
+        |  showA();
+        |}
+        |
+        |""".stripMargin
+    val expected =
+      """
+        |global
+        |global
+        |""".stripMargin
+    assertOutput(run(source))(expected)
+
   private def run(source: String): Unit =
     val tokens = Scanner(source).scanTokens()
     val statements = Parser(tokens).parse()
-    Interpreter().interpret(statements)
+    val interpreter = Interpreter()
+    Resolver(interpreter).resolve(statements)
+    interpreter.interpret(statements)

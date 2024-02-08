@@ -16,6 +16,7 @@ class InterpreterTest extends LoxTestBase:
       right = Expr.Literal(LoxDataType.Number(3)),
     )
     val stmts = Seq(Stmt.Print(expr))
+    Resolver(sut).resolve(stmts)
     val expected = LoxDataType.Number(9)
     assertOutput(sut.interpret(stmts))(expected.toString() + "\n")
 
@@ -142,6 +143,7 @@ class InterpreterTest extends LoxTestBase:
         expression = Expr.Literal(LoxDataType.String("foo")),
       ),
     )
+    Resolver(sut).resolve(stmts)
     val expected = "true\nnil\nfoo\n"
     assertOutput(sut.interpret(stmts))(expected)
 
@@ -188,6 +190,7 @@ class InterpreterTest extends LoxTestBase:
         ),
       ),
     )
+    Resolver(sut).resolve(stmts)
     val expected = "3\nnil\n5\nfoofoo\n"
     assertOutput(sut.interpret(stmts))(expected)
 
@@ -214,6 +217,7 @@ class InterpreterTest extends LoxTestBase:
       printVarStmt("b"),
       printVarStmt("c"),
     )
+    Resolver(sut).resolve(stmts)
     val expected =
       """inner a
         |outer b
@@ -251,6 +255,7 @@ class InterpreterTest extends LoxTestBase:
         elseBranch = Some(printLiteralStmt(6)),
       ),
     )
+    Resolver(sut).resolve(stmts)
     val expected =
       """1
         |3
@@ -290,6 +295,7 @@ class InterpreterTest extends LoxTestBase:
         ),
       ),
     )
+    Resolver(sut).resolve(stmts)
     val expected =
       """1
         |false
@@ -323,6 +329,7 @@ class InterpreterTest extends LoxTestBase:
         ),
       ),
     )
+    Resolver(sut).resolve(stmts)
     val expected =
       """1
         |2
@@ -344,6 +351,7 @@ class InterpreterTest extends LoxTestBase:
       right = Expr.Literal(right),
     )
     val stmts = Seq(Stmt.Print(expr))
+    Resolver(sut).resolve(stmts)
     assertOutput(sut.interpret(stmts))(expected.toString() + "\n")
 
   private def testSimpleUnaryExpr(
@@ -357,6 +365,7 @@ class InterpreterTest extends LoxTestBase:
       right = Expr.Literal(right),
     )
     val stmts = Seq(Stmt.Print(expr))
+    Resolver(sut).resolve(stmts)
     assertOutput(sut.interpret(stmts))(expected.toString() + "\n")
 
   private def varStmt(

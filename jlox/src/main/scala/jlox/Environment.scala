@@ -18,9 +18,31 @@ class Environment(
           case Some(env) => env.get(name)
           case None      => throw RuntimeError(name, s"Undefined variable '${name.lexeme}'.")
 
+  def getAt(distance: Int, name: Token): LoxDataType =
+    ancestor(distance).values.get(name.lexeme) match
+      case Some(v) => v
+      case None    => throw RuntimeError(name, s"Undefined variable '${name.lexeme}'.")
+
   def assign(name: Token, value: LoxDataType): Unit =
     if values.contains(name.lexeme) then values.put(name.lexeme, value)
     else
       enclosing match
         case Some(env) => env.assign(name, value)
         case None      => throw RuntimeError(name, s"Undefined variable '${name.lexeme}'")
+
+  def assignAt(distance: Int, name: Token, value: LoxDataType): Unit =
+    ancestor(distance).values.put(name.lexeme, value)
+
+  def ancestor(distance: Int): Environment =
+    var env = this
+    (0 until distance).foreach: _ =>
+      env = env.enclosing.get
+    env
+
+  private def debugPrint(): Unit =
+    println("[environment]")
+    values.foreach: (k, v) =>
+      println(s"$k => $v")
+    enclosing match
+      case Some(e) => e.debugPrint()
+      case None    => println("--------------------")
