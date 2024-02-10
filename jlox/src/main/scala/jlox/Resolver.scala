@@ -76,7 +76,9 @@ class Resolver(
     scopes.headOption.foreach: scope =>
       scope.put("this", true)
     stmt.methods.foreach: method =>
-      val declaration = FunctionType.Method
+      val declaration =
+        if method.name.lexeme == "init" then FunctionType.Initializer
+        else FunctionType.Method
       resolveFunction(method, declaration)
     endScope()
 
@@ -101,7 +103,10 @@ class Resolver(
   override def visitReturnStmt(stmt: Stmt.Return): Environment ?=> Unit =
     if currentFunction == FunctionType.None then
       Lox.error(stmt.keyword, "Can't return from top-level code.")
-    stmt.value.foreach(resolve)
+    stmt.value.foreach: v =>
+      if currentFunction == FunctionType.Initializer then
+        Lox.error(stmt.keyword, "Can't return a value from an initializer.")
+      resolve(v)
 
   override def visitVarStmt(stmt: Stmt.Var): Environment ?=> Unit =
     declare(stmt.name)
@@ -157,7 +162,7 @@ class Resolver(
 
 object Resolver:
   private enum FunctionType:
-    case None, Function, Method
+    case None, Function, Initializer, Method
 
   private enum ClassType:
     case None, Class

@@ -428,6 +428,38 @@ class LoxTest extends LoxTestBase:
         |""".stripMargin
     assertOutput(run(source))(expected)
 
+  test("class 3"):
+    val source =
+      """
+        |print "";
+        |
+        |class Foo {
+        |  init(a, b) {
+        |    this.a = a;
+        |    if (a == "xyz") {
+        |      return;
+        |    }
+        |    this.b = b;
+        |  }
+        |  
+        |  str() {
+        |    return "a = " + this.a + ", b = " + this.b;
+        |  }
+        |}
+        |
+        |var foo1 = Foo("abc", "def");
+        |print foo1.str();
+        |
+        |var foo2 = Foo("xyz", "123");
+        |print foo2.a;
+        |""".stripMargin
+    val expected =
+      """
+        |a = abc, b = def
+        |xyz
+        |""".stripMargin
+    assertOutput(run(source))(expected)
+
   private def run(source: String): Unit =
     val tokens = Scanner(source).scanTokens()
     val statements = Parser(tokens).parse()

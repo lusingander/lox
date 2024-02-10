@@ -36,7 +36,7 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
     summon[Environment].define(stmt.name.lexeme, LoxDataType.Nil)
     val methods = stmt.methods
       .map: method =>
-        method.name.lexeme -> LoxFunction(method, summon[Environment])
+        method.name.lexeme -> LoxFunction(method, summon[Environment], method.name.lexeme == "init")
       .toMap
     val cls = LoxClass(stmt.name.lexeme, methods)
     summon[Environment].assign(stmt.name, LoxDataType.Class(cls))
@@ -193,7 +193,7 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
   private def lookUpVariable(name: Token, expr: Expr): Environment ?=> LoxDataType =
     val distance = locals.get(genLocalsKey(expr))
     distance match
-      case Some(dist) => summon[Environment].getAt(dist, name)
+      case Some(dist) => summon[Environment].getAt(dist, name.lexeme)
       case None       => global.get(name)
 
   private def isTruthy(obj: LoxDataType): Boolean =

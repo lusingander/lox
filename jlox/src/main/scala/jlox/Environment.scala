@@ -18,10 +18,8 @@ class Environment(
           case Some(env) => env.get(name)
           case None      => throw RuntimeError(name, s"Undefined variable '${name.lexeme}'.")
 
-  def getAt(distance: Int, name: Token): LoxDataType =
-    ancestor(distance).values.get(name.lexeme) match
-      case Some(v) => v
-      case None    => throw RuntimeError(name, s"Undefined variable '${name.lexeme}'.")
+  def getAt(distance: Int, name: String): LoxDataType =
+    ancestor(distance).values.get(name).get
 
   def assign(name: Token, value: LoxDataType): Unit =
     if values.contains(name.lexeme) then values.put(name.lexeme, value)
