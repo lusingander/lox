@@ -521,6 +521,8 @@ class LoxTest extends LoxTestBase:
   private def run(source: String): Unit =
     val tokens = Scanner(source).scanTokens()
     val statements = Parser(tokens).parse()
+    if Lox.hadError then return
     val interpreter = Interpreter()
     Resolver(interpreter).resolve(statements)
+    if Lox.hadError then return
     interpreter.interpret(statements)

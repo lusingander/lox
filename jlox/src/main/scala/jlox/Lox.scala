@@ -26,8 +26,8 @@ object Lox:
     val bytes = Files.readAllBytes(Paths.get(path))
     run(String(bytes, Charset.defaultCharset()))
 
-    if (hadError) then System.exit(65)
-    if (hadRuntimeError) then System.exit(70)
+    if hadError then System.exit(65)
+    if hadRuntimeError then System.exit(70)
 
   def runPrompt(): Unit =
     while true do
