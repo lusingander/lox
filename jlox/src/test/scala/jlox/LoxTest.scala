@@ -362,11 +362,30 @@ class LoxTest extends LoxTestBase:
         |
         |var f = Foo();
         |print f;
+        |
+        |f.baz = "baaaaz";
+        |print f.baz;
+        |
+        |class A {}
+        |class B {}
+        |class C {}
+        |
+        |var a = A();
+        |a.b = B();
+        |a.b.c = C();
+        |
+        |print a;
+        |print a.b;
+        |print a.b.c;
         |""".stripMargin
     val expected =
       """
         |Foo
         |Foo instance
+        |baaaaz
+        |A instance
+        |B instance
+        |C instance
         |""".stripMargin
     assertOutput(run(source))(expected)
 

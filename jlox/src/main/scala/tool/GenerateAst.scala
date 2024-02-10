@@ -18,9 +18,11 @@ class GenerateAst:
       ("Assign", "name: Token, value: Expr"),
       ("Binary", "left: Expr, operator: Token, right: Expr"),
       ("Call", "callee: Expr, paren: Token, arguments: Seq[Expr]"),
+      ("Get", "obj: Expr, name: Token"),
       ("Grouping", "expression: Expr"),
       ("Literal", "value: LoxDataType"),
       ("Logical", "left: Expr, operator: Token, right: Expr"),
+      ("Set", "obj: Expr, name: Token, value: Expr"),
       ("Unary", "operator: Token, right: Expr"),
       ("Variable", "name: Token"),
     )

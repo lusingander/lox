@@ -140,6 +140,12 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
         cls.call(this, arguments)
       case _ => throw RuntimeError(expr.paren, "Can only call functions and classes.")
 
+  override def visitGetExpr(expr: Expr.Get): Environment ?=> LoxDataType =
+    val obj = evaluate(expr.obj)
+    obj match
+      case LoxDataType.Instance(instance) => instance.get(expr.name)
+      case _ => throw RuntimeError(expr.name, "Only instances have properties.")
+
   override def visitGroupingExpr(expr: Expr.Grouping): Environment ?=> LoxDataType =
     evaluate(expr.expression)
 
@@ -154,6 +160,15 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
       case TokenType.And =>
         if isTruthy(left) then evaluate(expr.right) else left
       case _ => throw RuntimeError(expr.operator, s"Unexpected operator: ${expr.operator.tp}")
+
+  override def visitSetExpr(expr: Expr.Set): Environment ?=> LoxDataType =
+    val obj = evaluate(expr.obj)
+    obj match
+      case LoxDataType.Instance(instance) =>
+        val value = evaluate(expr.value)
+        instance.set(expr.name, value)
+        value
+      case _ => throw RuntimeError(expr.name, "Only instances have fields.")
 
   override def visitUnaryExpr(expr: Expr.Unary): Environment ?=> LoxDataType =
     val right = evaluate(expr.right)

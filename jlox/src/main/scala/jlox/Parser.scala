@@ -24,6 +24,7 @@ class Parser(
       val value = assignment()
       expr match
         case Expr.Variable(name) => Expr.Assign(name, value)
+        case Expr.Get(obj, name) => Expr.Set(obj, name, value)
         case _ =>
           error(equals, "Invalid assignment target.")
           expr
@@ -209,6 +210,9 @@ class Parser(
     breakable:
       while true do
         if `match`(TokenType.LeftParen) then expr = finishCall(expr)
+        else if `match`(TokenType.Dot) then
+          val name = consume(TokenType.Identifier, "Expect property name after '.'.")
+          expr = Expr.Get(expr, name)
         else break
     expr
 

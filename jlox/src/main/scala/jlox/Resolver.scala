@@ -111,6 +111,9 @@ class Resolver(
     resolve(expr.callee)
     expr.arguments.foreach(resolve)
 
+  override def visitGetExpr(expr: Expr.Get): Environment ?=> Unit =
+    resolve(expr.obj)
+
   override def visitGroupingExpr(expr: Expr.Grouping): Environment ?=> Unit =
     resolve(expr.expression)
 
@@ -120,6 +123,10 @@ class Resolver(
   override def visitLogicalExpr(expr: Expr.Logical): Environment ?=> Unit =
     resolve(expr.left)
     resolve(expr.right)
+
+  override def visitSetExpr(expr: Expr.Set): Environment ?=> Unit =
+    resolve(expr.value)
+    resolve(expr.obj)
 
   override def visitUnaryExpr(expr: Expr.Unary): Environment ?=> Unit =
     resolve(expr.right)

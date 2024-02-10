@@ -1,6 +1,7 @@
 package jlox
 
 import scala.collection.mutable
+import jlox.Expr.Get
 
 class ExprTest extends LoxTestBase:
 
@@ -63,6 +64,10 @@ class AstPrinter extends Expr.Visitor[String]:
 
   override def visitAssignExpr(expr: Expr.Assign): Environment ?=> String = ???
 
+  override def visitGetExpr(expr: Get): (Environment) ?=> String = ???
+
+  override def visitSetExpr(expr: Expr.Set): (Environment) ?=> String = ???
+
   private def parenthesize(name: String, exprs: Expr*): Environment ?=> String =
     val b = mutable.StringBuilder()
     b.append("(")
@@ -94,3 +99,7 @@ class RpnPrinter extends Expr.Visitor[String]:
   override def visitVariableExpr(expr: Expr.Variable): Environment ?=> String = ???
 
   override def visitAssignExpr(expr: Expr.Assign): Environment ?=> String = ???
+
+  override def visitGetExpr(expr: Get): (Environment) ?=> String = ???
+
+  override def visitSetExpr(expr: Expr.Set): (Environment) ?=> String = ???
