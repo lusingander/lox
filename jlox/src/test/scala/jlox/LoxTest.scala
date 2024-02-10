@@ -452,11 +452,69 @@ class LoxTest extends LoxTestBase:
         |
         |var foo2 = Foo("xyz", "123");
         |print foo2.a;
+        |
+        |class Doughnut {
+        |  cook() {
+        |    print "Fry until golden brown.";
+        |  }
+        |}
+        |
+        |class BostonCream < Doughnut {}
+        |
+        |BostonCream().cook();
+        |
+        |class BostonCream2 < Doughnut {
+        |  cook() {
+        |    super.cook();
+        |    print "Pipe full of custard and coat with chocolate.";
+        |  }
+        |}
+        |
+        |BostonCream2().cook();
+        |
         |""".stripMargin
     val expected =
       """
         |a = abc, b = def
         |xyz
+        |Fry until golden brown.
+        |Fry until golden brown.
+        |Pipe full of custard and coat with chocolate.
+        |""".stripMargin
+    assertOutput(run(source))(expected)
+
+  test("class 4"):
+    val source =
+      """
+        |print "";
+        |
+        |class A {
+        |  method() {
+        |    print "A method";
+        |  }
+        |}
+        |
+        |class B < A {
+        |  method() {
+        |    print "B method";
+        |  }
+        |  test() {
+        |    super.method();
+        |  }
+        |}
+        |
+        |class C < B {}
+        |
+        |C().test();
+        |B().method();
+        |C().method();
+        |
+        |""".stripMargin
+    val expected =
+      """
+        |A method
+        |B method
+        |B method
         |""".stripMargin
     assertOutput(run(source))(expected)
 

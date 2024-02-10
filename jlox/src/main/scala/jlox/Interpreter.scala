@@ -33,12 +33,24 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
     executeBlock(stmt.statements)(using Environment(Some(summon[Environment])))
 
   override def visitClassStmt(stmt: Stmt.Class): Environment ?=> Unit =
+    val superclass = stmt.superclass.map: sc =>
+      evaluate(sc) match
+        case LoxDataType.Class(c) => c
+        case _                    => throw RuntimeError(sc.name, "Superclass must be a class.")
     summon[Environment].define(stmt.name.lexeme, LoxDataType.Nil)
+
+    val methodEnv = superclass match
+      case Some(sc) =>
+        val env = Environment(Some(summon[Environment]))
+        env.define("super", LoxDataType.Class(sc))
+        env
+      case None => summon[Environment]
     val methods = stmt.methods
       .map: method =>
-        method.name.lexeme -> LoxFunction(method, summon[Environment], method.name.lexeme == "init")
+        method.name.lexeme -> LoxFunction(method, methodEnv, method.name.lexeme == "init")
       .toMap
-    val cls = LoxClass(stmt.name.lexeme, methods)
+    val cls = LoxClass(stmt.name.lexeme, superclass, methods)
+
     summon[Environment].assign(stmt.name, LoxDataType.Class(cls))
 
   override def visitExpressionStmt(stmt: Stmt.Expression): Environment ?=> Unit =
@@ -173,6 +185,15 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
         instance.set(expr.name, value)
         value
       case _ => throw RuntimeError(expr.name, "Only instances have fields.")
+
+  override def visitSuperExpr(expr: Expr.Super): Environment ?=> LoxDataType =
+    val distance = locals.get(genLocalsKey(expr)).get
+    val superclass = summon[Environment].getAt(distance, "super").asInstanceOf[LoxDataType.Class]
+    val obj = summon[Environment].getAt(distance - 1, "this").asInstanceOf[LoxDataType.Instance]
+    val method = superclass.value.findMethod(expr.method.lexeme)
+    method match
+      case Some(m) => LoxDataType.Function(m.bind(obj.value))
+      case None => throw RuntimeError(expr.method, s"Undefined property '${expr.method.lexeme}'.")
 
   override def visitThisExpr(expr: Expr.This): Environment ?=> LoxDataType =
     lookUpVariable(expr.keyword, expr)

@@ -59,11 +59,14 @@ class Parser(
 
   private def classDeclaration(): Stmt =
     val name = consume(TokenType.Identifier, "Expect class name.")
+    val superclass = Option.when(`match`(TokenType.Less)):
+      consume(TokenType.Identifier, "Expect superclass name.")
+      Expr.Variable(previous())
     consume(TokenType.LeftBrace, "Expect '{' before class body.")
     val methods = mutable.ListBuffer.empty[Stmt.Function]
     while !check(TokenType.RightBrace) && !isAtEnd() do methods.addOne(function("method"))
     consume(TokenType.RightBrace, "Expect '}' after class body.")
-    Stmt.Class(name, methods.toSeq)
+    Stmt.Class(name, superclass, methods.toSeq)
 
   private def statement(): Stmt =
     if `match`(TokenType.For) then forStatement()
@@ -232,6 +235,11 @@ class Parser(
     else if `match`(TokenType.True) then Expr.Literal(LoxDataType.Bool(true))
     else if `match`(TokenType.Nil) then Expr.Literal(LoxDataType.Nil)
     else if `match`(TokenType.Number, TokenType.String) then Expr.Literal(previous().literal)
+    else if `match`(TokenType.Super) then
+      val keyword = previous()
+      consume(TokenType.Dot, "Expect '.' after 'super'.")
+      val method = consume(TokenType.Identifier, "Expect superclass method name.")
+      Expr.Super(keyword, method)
     else if `match`(TokenType.This) then Expr.This(previous())
     else if `match`(TokenType.Identifier) then Expr.Variable(previous())
     else if `match`(TokenType.LeftParen) then

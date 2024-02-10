@@ -72,6 +72,18 @@ class Resolver(
     declare(stmt.name)
     define(stmt.name)
 
+    stmt.superclass.foreach: sc =>
+      if sc.name.lexeme == stmt.name.lexeme then
+        Lox.error(sc.name, "A class can't inherit from itself.")
+    stmt.superclass.foreach: sc =>
+      currentClass = ClassType.SubClass
+      resolve(sc)
+
+    stmt.superclass.foreach: _ =>
+      beginScope()
+      scopes.headOption.foreach: scope =>
+        scope.put("super", true)
+
     beginScope()
     scopes.headOption.foreach: scope =>
       scope.put("this", true)
@@ -81,6 +93,9 @@ class Resolver(
         else FunctionType.Method
       resolveFunction(method, declaration)
     endScope()
+
+    stmt.superclass.foreach: _ =>
+      endScope()
 
     currentClass = enclosingClass
 
@@ -147,6 +162,13 @@ class Resolver(
     resolve(expr.value)
     resolve(expr.obj)
 
+  override def visitSuperExpr(expr: Expr.Super): Environment ?=> Unit =
+    if currentClass == ClassType.None then
+      Lox.error(expr.keyword, "Can't use 'super' outside of a class.")
+    else if currentClass != ClassType.SubClass then
+      Lox.error(expr.keyword, "Can't use 'super' in a class with no superclass.")
+    resolveLocal(expr, expr.keyword)
+
   override def visitThisExpr(expr: Expr.This): Environment ?=> Unit =
     if currentClass == ClassType.None then
       Lox.error(expr.keyword, "Can't use 'this' outside of a class.")
@@ -165,4 +187,4 @@ object Resolver:
     case None, Function, Initializer, Method
 
   private enum ClassType:
-    case None, Class
+    case None, Class, SubClass

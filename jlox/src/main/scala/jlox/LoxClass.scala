@@ -2,6 +2,7 @@ package jlox
 
 class LoxClass(
     val name: String,
+    val superclass: Option[LoxClass],
     val methods: Map[String, LoxFunction],
 ) extends LoxCallable:
 
@@ -19,6 +20,11 @@ class LoxClass(
     LoxDataType.Instance(instance)
 
   def findMethod(name: String): Option[LoxFunction] =
-    methods.get(name)
+    methods.get(name) match
+      case Some(m) => Some(m)
+      case None =>
+        superclass match
+          case Some(sc) => sc.findMethod(name)
+          case None     => None
 
   override def toString(): String = name

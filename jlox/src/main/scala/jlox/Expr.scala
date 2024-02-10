@@ -36,6 +36,10 @@ object Expr:
     override def accept[R](visitor: Visitor[R]): Environment ?=> R =
       visitor.visitSetExpr(this)
 
+  case class Super(keyword: Token, method: Token) extends Expr:
+    override def accept[R](visitor: Visitor[R]): Environment ?=> R =
+      visitor.visitSuperExpr(this)
+
   case class This(keyword: Token) extends Expr:
     override def accept[R](visitor: Visitor[R]): Environment ?=> R =
       visitor.visitThisExpr(this)
@@ -57,6 +61,7 @@ object Expr:
     def visitLiteralExpr(expr: Expr.Literal): Environment ?=> R
     def visitLogicalExpr(expr: Expr.Logical): Environment ?=> R
     def visitSetExpr(expr: Expr.Set): Environment ?=> R
+    def visitSuperExpr(expr: Expr.Super): Environment ?=> R
     def visitThisExpr(expr: Expr.This): Environment ?=> R
     def visitUnaryExpr(expr: Expr.Unary): Environment ?=> R
     def visitVariableExpr(expr: Expr.Variable): Environment ?=> R

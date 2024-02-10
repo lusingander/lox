@@ -23,13 +23,14 @@ class GenerateAst:
       ("Literal", "value: LoxDataType"),
       ("Logical", "left: Expr, operator: Token, right: Expr"),
       ("Set", "obj: Expr, name: Token, value: Expr"),
+      ("Super", "keyword: Token, method: Token"),
       ("This", "keyword: Token"),
       ("Unary", "operator: Token, right: Expr"),
       ("Variable", "name: Token"),
     )
     val stmtTypes = Seq(
       ("Block", "statements: Seq[Stmt]"),
-      ("Class", "name: Token, methods: Seq[Stmt.Function]"),
+      ("Class", "name: Token, superclass: Option[Expr.Variable], methods: Seq[Stmt.Function]"),
       ("Expression", "expression: Expr"),
       ("Function", "name: Token, params: Seq[Token], body: Seq[Stmt]"),
       ("If", "condition: Expr, thenBranch: Stmt, elseBranch: Option[Stmt]"),

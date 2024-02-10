@@ -8,7 +8,7 @@ object Stmt:
     override def accept[R](visitor: Visitor[R]): Environment ?=> R =
       visitor.visitBlockStmt(this)
 
-  case class Class(name: Token, methods: Seq[Stmt.Function]) extends Stmt:
+  case class Class(name: Token, superclass: Option[Expr.Variable], methods: Seq[Stmt.Function]) extends Stmt:
     override def accept[R](visitor: Visitor[R]): Environment ?=> R =
       visitor.visitClassStmt(this)
 
