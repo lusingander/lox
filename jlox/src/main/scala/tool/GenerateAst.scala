@@ -26,6 +26,7 @@ class GenerateAst:
     )
     val stmtTypes = Seq(
       ("Block", "statements: Seq[Stmt]"),
+      ("Class", "name: Token, methods: Seq[Stmt.Function]"),
       ("Expression", "expression: Expr"),
       ("Function", "name: Token, params: Seq[Token], body: Seq[Stmt]"),
       ("If", "condition: Expr, thenBranch: Stmt, elseBranch: Option[Stmt]"),

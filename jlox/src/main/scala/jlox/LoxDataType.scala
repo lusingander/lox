@@ -9,6 +9,8 @@ enum LoxDataType:
   case Bool(value: ScalaBoolean)
   case Nil
   case Function(value: LoxCallable)
+  case Class(value: LoxClass)
+  case Instance(value: LoxInstance)
 
   override def toString(): ScalaString =
     this match
@@ -20,3 +22,5 @@ enum LoxDataType:
       case LoxDataType.Bool(v)     => v.toString()
       case LoxDataType.Nil         => "nil"
       case LoxDataType.Function(v) => v.toString()
+      case LoxDataType.Class(v)    => v.toString()
+      case LoxDataType.Instance(v) => v.toString()

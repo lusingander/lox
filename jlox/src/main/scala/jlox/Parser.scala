@@ -47,13 +47,22 @@ class Parser(
 
   private def declaration(): Stmt =
     try
-      if `match`(TokenType.Fun) then function("function")
+      if `match`(TokenType.Class) then classDeclaration()
+      else if `match`(TokenType.Fun) then function("function")
       else if `match`(TokenType.Var) then varDeclaration()
       else statement()
     catch
       case e: ParseError =>
         synchronize()
         null
+
+  private def classDeclaration(): Stmt =
+    val name = consume(TokenType.Identifier, "Expect class name.")
+    consume(TokenType.LeftBrace, "Expect '{' before class body.")
+    val methods = mutable.ListBuffer.empty[Stmt.Function]
+    while !check(TokenType.RightBrace) && !isAtEnd() do methods.addOne(function("method"))
+    consume(TokenType.RightBrace, "Expect '}' after class body.")
+    Stmt.Class(name, methods.toSeq)
 
   private def statement(): Stmt =
     if `match`(TokenType.For) then forStatement()
@@ -133,7 +142,7 @@ class Parser(
     consume(TokenType.Semicolon, "Expect ';' after expression.")
     Stmt.Expression(expr)
 
-  private def function(kind: String): Stmt =
+  private def function(kind: String): Stmt.Function =
     val name = consume(TokenType.Identifier, s"Expect $kind name.")
     consume(TokenType.LeftParen, s"Expect '(' after $kind name.")
     val parameters = mutable.ListBuffer.empty[Token]

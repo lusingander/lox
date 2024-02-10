@@ -32,6 +32,11 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
   override def visitBlockStmt(stmt: Stmt.Block): Environment ?=> Unit =
     executeBlock(stmt.statements)(using Environment(Some(summon[Environment])))
 
+  override def visitClassStmt(stmt: Stmt.Class): Environment ?=> Unit =
+    summon[Environment].define(stmt.name.lexeme, LoxDataType.Nil)
+    val cls = LoxClass(stmt.name.lexeme)
+    summon[Environment].assign(stmt.name, LoxDataType.Class(cls))
+
   override def visitExpressionStmt(stmt: Stmt.Expression): Environment ?=> Unit =
     evaluate(stmt.expression)
 
@@ -126,6 +131,13 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
             s"Expected ${function.arity()} arguments but got ${arguments.size}.",
           )
         function.call(this, arguments)
+      case LoxDataType.Class(cls) =>
+        if arguments.size != cls.arity() then
+          throw RuntimeError(
+            expr.paren,
+            s"Expected ${cls.arity()} arguments but got ${arguments.size}.",
+          )
+        cls.call(this, arguments)
       case _ => throw RuntimeError(expr.paren, "Can only call functions and classes.")
 
   override def visitGroupingExpr(expr: Expr.Grouping): Environment ?=> LoxDataType =
@@ -169,6 +181,8 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
       case LoxDataType.Bool(v)     => v
       case LoxDataType.Nil         => false
       case LoxDataType.Function(_) => true
+      case LoxDataType.Class(_)    => true
+      case LoxDataType.Instance(_) => true
 
   private def genLocalsKey(expr: Expr): String =
     // Get the hashCode for each instance according to the book... :(

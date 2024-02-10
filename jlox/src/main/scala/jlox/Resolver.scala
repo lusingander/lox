@@ -64,6 +64,10 @@ class Resolver(
     resolve(stmt.statements)
     endScope()
 
+  override def visitClassStmt(stmt: Stmt.Class): Environment ?=> Unit =
+    declare(stmt.name)
+    define(stmt.name)
+
   override def visitExpressionStmt(stmt: Stmt.Expression): Environment ?=> Unit =
     resolve(stmt.expression)
 
