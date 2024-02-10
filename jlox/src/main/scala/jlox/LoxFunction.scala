@@ -21,4 +21,9 @@ class LoxFunction(
       case e: Interpreter.Return =>
         e.value
 
+  def bind(instance: LoxInstance): LoxFunction =
+    val environment = Environment(Some(closure))
+    environment.define("this", LoxDataType.Instance(instance))
+    LoxFunction(declaration, environment)
+
   override def toString(): String = s"<fn ${declaration.name.lexeme}>"

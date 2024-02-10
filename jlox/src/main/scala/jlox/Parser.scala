@@ -232,6 +232,7 @@ class Parser(
     else if `match`(TokenType.True) then Expr.Literal(LoxDataType.Bool(true))
     else if `match`(TokenType.Nil) then Expr.Literal(LoxDataType.Nil)
     else if `match`(TokenType.Number, TokenType.String) then Expr.Literal(previous().literal)
+    else if `match`(TokenType.This) then Expr.This(previous())
     else if `match`(TokenType.Identifier) then Expr.Variable(previous())
     else if `match`(TokenType.LeftParen) then
       val expr = expression()

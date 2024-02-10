@@ -34,7 +34,11 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
 
   override def visitClassStmt(stmt: Stmt.Class): Environment ?=> Unit =
     summon[Environment].define(stmt.name.lexeme, LoxDataType.Nil)
-    val cls = LoxClass(stmt.name.lexeme)
+    val methods = stmt.methods
+      .map: method =>
+        method.name.lexeme -> LoxFunction(method, summon[Environment])
+      .toMap
+    val cls = LoxClass(stmt.name.lexeme, methods)
     summon[Environment].assign(stmt.name, LoxDataType.Class(cls))
 
   override def visitExpressionStmt(stmt: Stmt.Expression): Environment ?=> Unit =
@@ -169,6 +173,9 @@ class Interpreter extends Expr.Visitor[LoxDataType] with Stmt.Visitor[Unit]:
         instance.set(expr.name, value)
         value
       case _ => throw RuntimeError(expr.name, "Only instances have fields.")
+
+  override def visitThisExpr(expr: Expr.This): Environment ?=> LoxDataType =
+    lookUpVariable(expr.keyword, expr)
 
   override def visitUnaryExpr(expr: Expr.Unary): Environment ?=> LoxDataType =
     val right = evaluate(expr.right)

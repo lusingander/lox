@@ -347,7 +347,7 @@ class LoxTest extends LoxTestBase:
         |""".stripMargin
     assertOutput(run(source))(expected)
 
-  test("class"):
+  test("class 1"):
     val source =
       """
         |print "";
@@ -386,6 +386,45 @@ class LoxTest extends LoxTestBase:
         |A instance
         |B instance
         |C instance
+        |""".stripMargin
+    assertOutput(run(source))(expected)
+
+  test("class 2"):
+    val source =
+      """
+        |print "";
+        |
+        |class Foo {
+        |  hello() {
+        |    print "Hello, Foo...";
+        |  }
+        |}
+        |
+        |class FooCreator {
+        |  create() {
+        |    return Foo();
+        |  }
+        |}
+        |
+        |Foo().hello();
+        |FooCreator().create().hello();
+        |
+        |class Cake {
+        |  taste() {
+        |    var adjective = "delicious";
+        |    print "The " + this.flavor + " cake is " + adjective + "!";
+        |  }
+        |}
+        |
+        |var cake = Cake();
+        |cake.flavor = "German chocolate";
+        |cake.taste();
+        |""".stripMargin
+    val expected =
+      """
+        |Hello, Foo...
+        |Hello, Foo...
+        |The German chocolate cake is delicious!
         |""".stripMargin
     assertOutput(run(source))(expected)
 

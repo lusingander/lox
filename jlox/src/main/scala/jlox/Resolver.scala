@@ -13,6 +13,7 @@ class Resolver(
 
   private val scopes: mutable.Stack[mutable.Map[String, Boolean]] = mutable.Stack.empty
   private var currentFunction: FunctionType = FunctionType.None
+  private var currentClass: ClassType = ClassType.None
 
   def resolve(statements: Seq[Stmt]): Unit =
     statements.foreach(resolve)
@@ -65,8 +66,21 @@ class Resolver(
     endScope()
 
   override def visitClassStmt(stmt: Stmt.Class): Environment ?=> Unit =
+    val enclosingClass = currentClass
+    currentClass = ClassType.Class
+
     declare(stmt.name)
     define(stmt.name)
+
+    beginScope()
+    scopes.headOption.foreach: scope =>
+      scope.put("this", true)
+    stmt.methods.foreach: method =>
+      val declaration = FunctionType.Method
+      resolveFunction(method, declaration)
+    endScope()
+
+    currentClass = enclosingClass
 
   override def visitExpressionStmt(stmt: Stmt.Expression): Environment ?=> Unit =
     resolve(stmt.expression)
@@ -128,6 +142,11 @@ class Resolver(
     resolve(expr.value)
     resolve(expr.obj)
 
+  override def visitThisExpr(expr: Expr.This): Environment ?=> Unit =
+    if currentClass == ClassType.None then
+      Lox.error(expr.keyword, "Can't use 'this' outside of a class.")
+    else resolveLocal(expr, expr.keyword)
+
   override def visitUnaryExpr(expr: Expr.Unary): Environment ?=> Unit =
     resolve(expr.right)
 
@@ -138,4 +157,7 @@ class Resolver(
 
 object Resolver:
   private enum FunctionType:
-    case None, Function
+    case None, Function, Method
+
+  private enum ClassType:
+    case None, Class
