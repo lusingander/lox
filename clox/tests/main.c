@@ -14,24 +14,24 @@ MU_TEST(test_chunk) {
 	mu_check(chunk.count == 0);
 	mu_check(chunk.capacity == 0);
 
-    writeChunk(&chunk, 2);
+    writeChunk(&chunk, 2, 10);
 	mu_check(chunk.count == 1);
 	mu_check(chunk.capacity == 8);
 
-    writeChunk(&chunk, 3);
+    writeChunk(&chunk, 3, 11);
 	mu_check(chunk.count == 2);
 	mu_check(chunk.capacity == 8);
 
-    writeChunk(&chunk, 0);
-    writeChunk(&chunk, 0);
-    writeChunk(&chunk, 1);
-    writeChunk(&chunk, 1);
-    writeChunk(&chunk, 2);
-    writeChunk(&chunk, 2);
+    writeChunk(&chunk, 0, 20);
+    writeChunk(&chunk, 0, 20);
+    writeChunk(&chunk, 1, 20);
+    writeChunk(&chunk, 1, 20);
+    writeChunk(&chunk, 2, 20);
+    writeChunk(&chunk, 2, 20);
 	mu_check(chunk.count == 8);
 	mu_check(chunk.capacity == 8);
 
-    writeChunk(&chunk, 3);
+    writeChunk(&chunk, 3, 30);
 	mu_check(chunk.count == 9);
 	mu_check(chunk.capacity == 16);
 
