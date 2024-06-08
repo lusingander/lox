@@ -1,10 +1,13 @@
-#include <stdio.h>
-#include "add.h"
+#include "common.h"
+#include "chunk.h"
+#include "debug.h"
 
-int main()
+int main(int argc, const char *argv[])
 {
-    int x = add(1, 2);
-    printf("1 + 2 = %d\n", x);
-
+    Chunk chunk;
+    initChunk(&chunk);
+    writeChunk(&chunk, OP_RETURN);
+    disassembleChunk(&chunk, "test chunk");
+    freeChunk(&chunk);
     return 0;
 }
