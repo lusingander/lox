@@ -1,11 +1,6 @@
 #include "minunit.h"
 
-#include "../src/add.h"
 #include "../src/chunk.h"
-
-MU_TEST(test_add) {
-	mu_check(add(1, 2) == 3);
-}
 
 MU_TEST(test_chunk) {
     Chunk chunk;
@@ -41,7 +36,6 @@ MU_TEST(test_chunk) {
 }
 
 MU_TEST_SUITE(test_suite) {
-	MU_RUN_TEST(test_add);
 	MU_RUN_TEST(test_chunk);
 }
 
