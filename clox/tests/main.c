@@ -1,6 +1,7 @@
 #include "minunit.h"
 
 #include "../src/chunk.h"
+#include "../src/scanner.h"
 
 MU_TEST(test_chunk) {
     Chunk chunk;
@@ -35,8 +36,33 @@ MU_TEST(test_chunk) {
 	mu_check(chunk.capacity == 0);
 }
 
+MU_TEST(test_scanner) {
+	const char* source =
+		"(} =;==+	<=>\n"
+		"*\r1.23// +-\n"
+		"/+/\"+-\"\n";
+	initScanner(source);
+	mu_check(scanToken().type == TOKEN_LEFT_PAREN);
+	mu_check(scanToken().type == TOKEN_RIGHT_BRACE);
+	mu_check(scanToken().type == TOKEN_EQUAL);
+	mu_check(scanToken().type == TOKEN_SEMICOLON);
+	mu_check(scanToken().type == TOKEN_EQUAL_EQUAL);
+	mu_check(scanToken().type == TOKEN_PLUS);
+	mu_check(scanToken().type == TOKEN_LESS_EQUAL);
+	mu_check(scanToken().type == TOKEN_GREATER);
+
+	mu_check(scanToken().type == TOKEN_STAR);
+	mu_check(scanToken().type == TOKEN_NUMBER);
+
+	mu_check(scanToken().type == TOKEN_SLASH);
+	mu_check(scanToken().type == TOKEN_PLUS);
+	mu_check(scanToken().type == TOKEN_SLASH);
+	mu_check(scanToken().type == TOKEN_STRING);
+}
+
 MU_TEST_SUITE(test_suite) {
 	MU_RUN_TEST(test_chunk);
+	MU_RUN_TEST(test_scanner);
 }
 
 int main() {
