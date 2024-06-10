@@ -40,7 +40,8 @@ MU_TEST(test_scanner) {
 	const char* source =
 		"(} =;==+	<=>\n"
 		"*\r1.23// +-\n"
-		"/+/\"+-\"\n";
+		"/+/\"+-\"\n"
+		"x123 an and classes f fu fun\n";
 	initScanner(source);
 	mu_check(scanToken().type == TOKEN_LEFT_PAREN);
 	mu_check(scanToken().type == TOKEN_RIGHT_BRACE);
@@ -58,6 +59,16 @@ MU_TEST(test_scanner) {
 	mu_check(scanToken().type == TOKEN_PLUS);
 	mu_check(scanToken().type == TOKEN_SLASH);
 	mu_check(scanToken().type == TOKEN_STRING);
+
+	mu_check(scanToken().type == TOKEN_IDENTIFIER);
+	mu_check(scanToken().type == TOKEN_IDENTIFIER);
+	mu_check(scanToken().type == TOKEN_AND);
+	mu_check(scanToken().type == TOKEN_IDENTIFIER);
+	mu_check(scanToken().type == TOKEN_IDENTIFIER);
+	mu_check(scanToken().type == TOKEN_IDENTIFIER);
+	mu_check(scanToken().type == TOKEN_FUN);
+
+	// printf("%d", scanToken().type);
 }
 
 MU_TEST_SUITE(test_suite) {
